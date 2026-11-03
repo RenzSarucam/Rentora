@@ -45,6 +45,7 @@ export function AdminNav({ pendingPayments, openRequests, onNavigate }: { pendin
         { href: "/admin/announcements", label: "Announcements", icon: Megaphone },
       ],
     },
+    { items: [{ href: "/admin/settings", label: "Settings", icon: Settings }] },
   ];
 
   const link = (item: Item) => {
@@ -74,14 +75,13 @@ export function AdminNav({ pendingPayments, openRequests, onNavigate }: { pendin
   };
 
   return (
-    <nav aria-label="Admin" className="flex flex-1 flex-col">
+    <nav aria-label="Admin" className="flex min-h-0 flex-1 flex-col overflow-y-auto">
       {groups.map((group, i) => (
-        <div key={i} className={cn(i > 0 && "mt-6")}>
+        <div key={i} className={cn("shrink-0", i > 0 && "mt-6")}>
           {group.label && <p className="mb-1.5 px-2.5 text-xs text-muted-foreground">{group.label}</p>}
           <ul className="grid gap-0.5">{group.items.map(link)}</ul>
         </div>
       ))}
-      <ul className="mt-auto grid gap-0.5 pt-6">{link({ href: "/admin/settings", label: "Settings", icon: Settings })}</ul>
     </nav>
   );
 }

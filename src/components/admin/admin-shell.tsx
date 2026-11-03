@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Wordmark } from "@/components/app/brand";
+import { cn } from "@/lib/utils";
 import { AdminNav } from "./admin-nav";
 
 export function AdminShell({
@@ -24,9 +26,16 @@ export function AdminShell({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const isViewportPage = pathname === "/admin/dashboard" || pathname === "/admin/billing";
+  const mainRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    mainRef.current?.scrollTo(0, 0);
+  }, [pathname]);
 
   const account = (
-    <div className="mt-4 border-t border-border pt-3">
+    <div className="mt-4 shrink-0 border-t border-border pt-3 lg:mt-3">
       <p className="truncate px-2.5 text-sm font-medium text-foreground">{userName}</p>
       <p className="truncate px-2.5 text-xs text-muted-foreground">{userEmail}</p>
       <div className="mt-2">{signOut}</div>
@@ -34,10 +43,10 @@ export function AdminShell({
   );
 
   return (
-    <div className="min-h-dvh bg-ground lg:grid lg:grid-cols-[228px_1fr] lg:grid-rows-[48px_1fr]">
+    <div className="min-h-dvh bg-ground lg:fixed lg:inset-0 lg:grid lg:h-dvh lg:min-h-0 lg:grid-cols-[228px_minmax(0,1fr)] lg:grid-rows-[48px_minmax(0,1fr)] lg:overflow-hidden">
       {/* Sidebar: part of the tinted frame, no rule against the top bar. */}
-      <aside className="hidden lg:row-span-2 lg:flex lg:flex-col lg:px-3 lg:pt-3 lg:pb-4">
-        <div className="mb-5 px-2.5">
+      <aside className="hidden lg:row-span-2 lg:flex lg:min-h-0 lg:flex-col lg:overflow-hidden lg:px-3 lg:pt-3 lg:pb-2">
+        <div className="mb-5 shrink-0 px-2.5">
           <Wordmark />
           <p className="mt-1 truncate text-xs text-muted-foreground" title={orgName}>
             {orgName}
@@ -77,10 +86,14 @@ export function AdminShell({
 
       {/* The sheet: white, inset 8px from the right and bottom, hairline edge, no shadow. */}
       <main
+        ref={mainRef}
         id="main"
-        className="min-w-0 bg-background px-4 py-6 sm:px-6 lg:mr-2 lg:mb-2 lg:rounded-2xl lg:border lg:border-border lg:px-8 lg:py-7"
+        className={cn(
+          "min-w-0 bg-background px-4 py-6 sm:px-6 lg:mr-2 lg:mb-2 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:rounded-2xl lg:border lg:border-border lg:px-8 lg:py-7",
+          isViewportPage && "lg:overflow-hidden lg:py-5",
+        )}
       >
-        <div className="mx-auto max-w-[1240px]">{children}</div>
+        <div className={cn("mx-auto max-w-[1240px]", isViewportPage && "lg:h-full lg:min-h-0")}>{children}</div>
       </main>
     </div>
   );

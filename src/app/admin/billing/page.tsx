@@ -41,8 +41,9 @@ export default async function BillingPage() {
   const overdue = invoices.filter((i) => i.overdue);
 
   return (
-    <>
+    <div className="lg:flex lg:h-full lg:min-h-0 lg:flex-col">
       <PageHeader
+        className="shrink-0"
         title="Billing"
         description={
           summary.count
@@ -57,7 +58,7 @@ export default async function BillingPage() {
         }
       />
 
-      <dl className="mb-8 grid grid-cols-2 divide-border rounded-lg border border-border sm:grid-cols-4 sm:divide-x">
+      <dl className="mb-6 grid shrink-0 grid-cols-2 divide-border rounded-lg border border-border sm:grid-cols-4 sm:divide-x">
         <div className="p-4">
           <dt className="text-sm text-muted-foreground">Billed in {formatMonth(current).split(" ")[0]}</dt>
           <dd className="num mt-1 text-2xl">{formatPeso(summary.billed)}</dd>
@@ -83,6 +84,6 @@ export default async function BillingPage() {
       </dl>
 
       <InvoiceTable invoices={invoices} months={filterMonths} />
-    </>
+    </div>
   );
 }

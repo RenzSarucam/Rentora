@@ -12,6 +12,7 @@ const ALLOWED_TYPES: EmailOtpType[] = ["invite", "recovery", "email", "signup", 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const tokenHash = searchParams.get("token_hash");
+  const code = searchParams.get("code");
   const type = searchParams.get("type") as EmailOtpType | null;
   const next = safeNextPath(searchParams.get("next"), "/");
 
@@ -22,6 +23,18 @@ export async function GET(request: NextRequest) {
       const destination = type === "invite" || type === "recovery" ? "/auth/set-password" : next;
       return new NextResponse(null, { status: 303, headers: { Location: destination } });
     }
+  } else if (code && !tokenHash && !searchParams.has("error")) {
+    // Password recovery initiated with the SSR client can return a PKCE code.
+    const supabase = await createClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
+      return new NextResponse(null, { status: 303, headers: { Location: "/auth/set-password" } });
+    }
+  } else if (!tokenHash && !code && !type && !searchParams.has("error") && !searchParams.has("error_code")) {
+    // Default invitation emails carry #access_token after Supabase verifies them.
+    // A relative redirect preserves that fragment for the browser to exchange for cookies.
+    const query = new URLSearchParams({ next });
+    return new NextResponse(null, { status: 303, headers: { Location: `/auth/callback?${query}` } });
   }
   return new NextResponse(null, { status: 303, headers: { Location: "/login?error=link" } });
 }

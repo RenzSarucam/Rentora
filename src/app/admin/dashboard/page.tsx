@@ -51,8 +51,9 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <>
+    <div className="lg:flex lg:h-full lg:min-h-0 lg:flex-col">
       <PageHeader
+        className="mb-4 shrink-0"
         title="Dashboard"
         description={finding}
         actions={
@@ -73,12 +74,12 @@ export default async function DashboardPage() {
       />
 
       {/* KPIs: one container split by dividers, label over value. */}
-      <section aria-label="Key figures" className="mb-6 grid grid-cols-2 overflow-hidden rounded-lg border border-border md:grid-cols-5">
+      <section aria-label="Key figures" className="mb-4 grid shrink-0 grid-cols-2 overflow-hidden rounded-lg border border-border md:grid-cols-5">
         {kpis.map((k, i) => (
           <div
             key={k.label}
             className={cn(
-              "border-border p-4 md:border-l md:first:border-l-0",
+              "border-border p-4 md:border-l md:first:border-l-0 lg:p-3",
               i % 2 === 1 && "border-l",
               i >= 2 && "border-t md:border-t-0",
               i === kpis.length - 1 && "col-span-2 md:col-span-1",
@@ -91,10 +92,10 @@ export default async function DashboardPage() {
         ))}
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_320px] lg:grid-rows-[minmax(0,3fr)_minmax(0,2fr)] xl:grid-cols-[minmax(0,1fr)_360px]">
         {/* The screen's question: is this month's rent coming in? */}
-        <section aria-labelledby="rent-heading" className="rounded-lg border border-border p-5">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+        <section aria-labelledby="rent-heading" tabIndex={0} className="flex flex-col rounded-lg border border-border p-4 lg:min-h-0 lg:overflow-y-auto">
+          <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
             <div>
               <h2 id="rent-heading" className="text-base font-semibold">
                 {formatMonth(d.thisMonth)} rent
@@ -113,7 +114,7 @@ export default async function DashboardPage() {
             </Link>
           </div>
           {d.thisMonthInvoiced && (
-            <div className="mt-4">
+            <div className="mt-3 shrink-0">
               <div
                 className="h-2 w-full overflow-hidden rounded-full bg-active"
                 role="progressbar"
@@ -130,7 +131,7 @@ export default async function DashboardPage() {
               </div>
             </div>
           )}
-          <h3 className="mt-6 mb-2 text-sm font-medium text-muted-foreground">Payments received, last 6 months</h3>
+          <h3 className="mt-3 mb-2 shrink-0 text-sm font-medium text-muted-foreground">Payments received, last 6 months</h3>
           <CollectionsChart
             data={d.collections.map((c) => ({
               month: c.month,
@@ -141,9 +142,9 @@ export default async function DashboardPage() {
           />
         </section>
 
-        <div className="grid content-start gap-6">
-          <section aria-labelledby="approvals-heading">
-            <div className="mb-2 flex items-center justify-between">
+        <div className="grid content-start gap-4 lg:min-h-0 lg:grid-rows-[minmax(0,1fr)_minmax(0,1fr)]">
+          <section aria-labelledby="approvals-heading" className="flex min-h-0 flex-col">
+            <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
               <h2 id="approvals-heading" className="text-base font-semibold">
                 Payments to review <span className="num text-muted-foreground">{d.pendingCount}</span>
               </h2>
@@ -153,7 +154,7 @@ export default async function DashboardPage() {
                 </Link>
               )}
             </div>
-            <div className="rounded-lg border border-border">
+            <div role="region" aria-labelledby="approvals-heading" tabIndex={0} className="min-h-0 overflow-y-auto rounded-lg border border-border lg:flex-1">
               {d.pending.length === 0 ? (
                 <p className="px-4 py-5 text-sm text-muted-foreground">No payment proofs waiting.</p>
               ) : (
@@ -174,8 +175,8 @@ export default async function DashboardPage() {
             </div>
           </section>
 
-          <section aria-labelledby="repairs-heading">
-            <div className="mb-2 flex items-center justify-between">
+          <section aria-labelledby="repairs-heading" className="flex min-h-0 flex-col">
+            <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
               <h2 id="repairs-heading" className="text-base font-semibold">
                 Open repairs <span className="num text-muted-foreground">{d.openRequestCount}</span>
               </h2>
@@ -183,7 +184,7 @@ export default async function DashboardPage() {
                 View all
               </Link>
             </div>
-            <div className="rounded-lg border border-border">
+            <div role="region" aria-labelledby="repairs-heading" tabIndex={0} className="min-h-0 overflow-y-auto rounded-lg border border-border lg:flex-1">
               {d.requests.length === 0 ? (
                 <p className="px-4 py-5 text-sm text-muted-foreground">Nothing needs fixing right now.</p>
               ) : (
@@ -208,34 +209,36 @@ export default async function DashboardPage() {
           </section>
         </div>
 
-        <section aria-labelledby="house-heading" className="rounded-lg border border-border p-5">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <section aria-labelledby="house-heading" className="flex min-h-0 flex-col rounded-lg border border-border p-4">
+          <div className="mb-3 flex shrink-0 flex-wrap items-center justify-between gap-3">
             <h2 id="house-heading" className="text-base font-semibold">
               The house <span className="num text-sm font-normal text-muted-foreground">· {occ.rooms} rooms, {occ.beds} beds</span>
             </h2>
             <BedLegend />
           </div>
-          {rooms.length === 0 ? (
-            <EmptyState title="No rooms yet" action={<Button asChild variant="outline"><Link href="/admin/rooms">Add rooms</Link></Button>} />
-          ) : (
-            <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
-              {rooms.map((room) => (
-                <li key={room.id} className="flex items-center gap-3">
-                  <Link href={`/admin/rooms/${room.id}`} className="w-20 shrink-0 text-sm font-medium hover:underline">
-                    Room {room.code}
-                  </Link>
-                  <BedCells beds={room.beds} roomUnderMaintenance={room.status === "maintenance"} size="sm" />
-                </li>
-              ))}
-            </ul>
-          )}
+          <div role="region" aria-label="Rooms and beds" tabIndex={0} className="min-h-0 overflow-y-auto lg:flex-1">
+            {rooms.length === 0 ? (
+              <EmptyState title="No rooms yet" action={<Button asChild variant="outline"><Link href="/admin/rooms">Add rooms</Link></Button>} />
+            ) : (
+              <ul className="grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                {rooms.map((room) => (
+                  <li key={room.id} className="flex items-center gap-3">
+                    <Link href={`/admin/rooms/${room.id}`} className="w-20 shrink-0 text-sm font-medium hover:underline">
+                      Room {room.code}
+                    </Link>
+                    <BedCells beds={room.beds} roomUnderMaintenance={room.status === "maintenance"} size="sm" />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </section>
 
-        <section aria-labelledby="activity-heading">
-          <h2 id="activity-heading" className="mb-2 text-base font-semibold">
+        <section aria-labelledby="activity-heading" className="flex min-h-0 flex-col">
+          <h2 id="activity-heading" className="mb-2 shrink-0 text-base font-semibold">
             Recent activity
           </h2>
-          <div className="rounded-lg border border-border">
+          <div role="region" aria-labelledby="activity-heading" tabIndex={0} className="min-h-0 overflow-y-auto rounded-lg border border-border lg:flex-1">
             {d.activity.length === 0 ? (
               <p className="px-4 py-5 text-sm text-muted-foreground">Activity appears here as you and your boarders use Rentora.</p>
             ) : (
@@ -253,6 +256,6 @@ export default async function DashboardPage() {
           </div>
         </section>
       </div>
-    </>
+    </div>
   );
 }

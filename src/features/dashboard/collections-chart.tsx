@@ -10,7 +10,7 @@ const compact = new Intl.NumberFormat("en-PH", { notation: "compact", maximumFra
 /** One series, one hue: the current month in teal, earlier months in soft gray. */
 export function CollectionsChart({ data }: { data: Point[] }) {
   return (
-    <div className="h-[200px] w-full" role="img" aria-label={`Collections by month: ${data.map((d) => `${d.label} ${formatPeso(d.collected)}`).join(", ")}`}>
+    <div className="h-[200px] w-full shrink-0 lg:h-auto lg:min-h-[88px] lg:flex-1" role="img" aria-label={`Collections by month: ${data.map((d) => `${d.label} ${formatPeso(d.collected)}`).join(", ")}`}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 8, right: 0, left: 0, bottom: 0 }} barCategoryGap="28%">
           <CartesianGrid vertical={false} stroke="var(--rule)" />

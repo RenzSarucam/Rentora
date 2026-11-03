@@ -45,6 +45,8 @@ export function DataTable<T extends RowData>({
   toolbar,
   countLabel,
   rowClassName,
+  fitViewport = false,
+  scrollLabel = "Table rows",
 }: {
   data: T[];
   columns: Column<T>[];
@@ -53,6 +55,8 @@ export function DataTable<T extends RowData>({
   toolbar?: React.ReactNode;
   countLabel?: (n: number) => string;
   rowClassName?: (row: T) => string | undefined;
+  fitViewport?: boolean;
+  scrollLabel?: string;
 }) {
   const [globalFilter, setGlobalFilter] = useState("");
   const table = useTable({
@@ -66,9 +70,9 @@ export function DataTable<T extends RowData>({
   const rows = table.getRowModel().rows;
 
   return (
-    <div>
+    <div className={cn(fitViewport && "lg:flex lg:min-h-0 lg:flex-1 lg:flex-col")}>
       {(searchPlaceholder || toolbar || countLabel) && (
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-3 flex shrink-0 flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             {searchPlaceholder && (
               <div className="relative w-full sm:w-72">
@@ -88,9 +92,14 @@ export function DataTable<T extends RowData>({
           {countLabel && <p className="text-sm text-muted-foreground num">{countLabel(rows.length)}</p>}
         </div>
       )}
-      <div className="overflow-x-auto">
+      <div
+        role={fitViewport ? "region" : undefined}
+        aria-label={fitViewport ? scrollLabel : undefined}
+        tabIndex={fitViewport ? 0 : undefined}
+        className={cn("overflow-x-auto", fitViewport && "lg:min-h-0 lg:flex-1 lg:overflow-auto lg:overscroll-contain")}
+      >
         <table className="w-full border-collapse text-sm">
-          <thead>
+          <thead className={cn(fitViewport && "lg:sticky lg:top-0 lg:z-10 lg:bg-background")}>
             {table.getHeaderGroups().map((group) => (
               <tr key={group.id} className="border-b border-border">
                 {group.headers.map((header) => {

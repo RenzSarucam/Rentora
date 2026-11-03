@@ -85,7 +85,7 @@ export async function inviteBoarder(input: unknown): Promise<ActionResult<{ id: 
     return dbFail(error);
   }
   refresh();
-  return ok({ id: memberId as string }, `Invitation sent to ${v.email}. The link works once, within 24 hours.`);
+  return ok({ id: memberId as string }, `Invitation sent to ${v.email}. Use the latest email; its link works only once.`);
 }
 
 type MemberLookup = { id: string; status: string; profiles: { email: string; full_name: string; phone: string | null } | null };

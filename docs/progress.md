@@ -45,7 +45,7 @@ The hosted test run used a separately started production server with `E2E_BASE_U
 
 ## Not yet verified / blocked
 
-- Invitation and password recovery **email delivery**, confirmation links and first-password setup against a real inbox; SMTP provider still needs the owner's decision.
+- A real Gmail invitation reached the owner, but the default email link failed in the original callback. Default-link handling is now implemented (see below); completed password setup and acceptance from a real inbox still need a fresh link. SMTP provider still needs the owner's decision.
 - Live payment-proof / maintenance-photo uploads, signed URLs and their expiry, and approval/rejection workflows through the browser. The walkthrough exercised reads and navigation; SQL/RPC/storage policies remain covered by PGlite tests.
 - Live cross-organization isolation with a second seeded organization (covered by database tests, not yet exercised in the hosted project).
 - PWA installability and service worker behaviour on physical devices; Pixel 7 browser emulation is not a real-device check.
@@ -72,13 +72,51 @@ The hosted test run used a separately started production server with `E2E_BASE_U
 - Disabled Next's default dev Server Function argument logging because sign-in arguments include passwords.
 - Validation after the LAN/redirect changes: `npm run verify` passed (151 unit/database tests, typecheck, lint, security scan and production build); all 12 request-security Playwright checks passed on desktop and phone viewports against the production build.
 
+## Email link compatibility (2026-11-03)
+
+- Confirmed the hosted project still uses default `ConfirmationURL` templates. They verify at Supabase and return a session in a URL fragment (invitation) or a PKCE code (SSR recovery). The original `/auth/confirm` only accepted `token_hash`, so a valid default invitation could confirm the email and still end at the invalid-link screen.
+- Attempted to install the repository templates in `rentora-dev`, but Supabase returned HTTP 400: custom templates are unavailable on its free/default-email-provider setup until custom SMTP or an eligible plan is configured. No hosted templates were changed and no emails were sent by the agent.
+- The callback now preserves default invitation fragments for `/auth/callback`, where the browser validates the session through Supabase and writes SSR cookies, then opens password setup. Credentials are removed from browser history before requests/navigation. The server continues to validate sessions and enforce membership/RLS. PKCE recovery codes are also handled server-side; custom token-hash templates remain supported.
+- Fragment removal preserves Next's history state to avoid remounting the callback during session setup. Browser tests wait for the initial navigation to commit and for the sign-in page to render before starting another navigation, so immediate client redirects do not cancel the test's page load.
+- Suppressed dev request logging for the token-bearing confirmation path. Removed the hardcoded 24-hour expiry promise from invite/reset messages and local templates because the hosted project's recovery OTP expiry is one hour.
+- Read-only inspection found one pending boarder whose Auth email was already confirmed. For that previously consumed default invite, request a fresh link through **Forgot your password?** using the invited email, open it in the same browser that requested it, then choose a password. Password setup calls `accept_invitation`, activating the existing membership.
+- Validation: `npm run verify` passed with 166 unit/database tests, lint, typecheck, security scan and build. The default-link browser tests passed on desktop and phone viewports using mocked Supabase responses (no real email/token consumption). The combined 68-test callback/protected-route run had 66 passes and two Edge setup/teardown timeouts; both failed checks passed when rerun with one worker. Real inbox completion remains pending.
+- Final LAN regression run against `http://172.20.10.4:3000`: all 8 email-link checks passed on desktop and phone viewports with one worker. The temporary agent-owned dev server was stopped after testing so the owner can run `npm.cmd run dev` without a port conflict.
+
+## Admin dashboard layout (2026-11-03)
+
+- Moved Settings directly below Announcements in the shared desktop/mobile admin navigation. The account footer stays separate, and shorter sidebars can scroll their navigation.
+- The desktop dashboard now fits the viewport, with its card grid taking the available space below the page header and figures. Activity, payment proofs, repairs and room lists scroll inside their cards; the chart adapts to its card height. Scroll regions are keyboard-focusable. Narrower desktop room maps use one column to keep bed cells readable.
+- The phone dashboard keeps a vertical layout. Billing has its own invoice scroll layout (see below).
+- Validation: the full verification command passed with 166 unit/database tests, typecheck, lint, security scan and build. Focused live browser checks confirmed no document overflow at 1440×900, 1366×768, 1280×720, 1024×768 and 1280×600, card scrolling by keyboard, Settings directly after Announcements, normal report scrolling, and phone menu navigation. Screenshots are in gitignored `test-results/dashboard-review/`.
+
+## Billing scroll layout (2026-11-03)
+
+- Desktop Billing now fits the viewport. The invoice list scrolls within the remaining space below the summary, status tabs and search/month filters. Column headings stay visible while invoice rows scroll; wide tables scroll horizontally to keep invoice numbers, names, periods and dates readable.
+- Added an opt-in viewport layout to the shared DataTable and enabled it for invoices. Scroll regions are keyboard-focusable, and status tabs only scroll horizontally. Settings was confirmed immediately below Announcements on desktop and phone navigation.
+- Validation: full verification passed with 166 unit/database tests, typecheck, lint, security scan and build. Focused signed-in browser checks covered 1440×900, 1366×768, 1280×720, 1024×768 and 1280×600; invoice scrolling, sticky headings, fixed controls, keyboard use, search empty state, status/month filters, sorting and invoice details all passed. Dashboard, reports and phone navigation checks also passed. Screenshots are in gitignored `test-results/billing-review/`.
+
+## Fixed desktop admin frame (2026-11-03)
+
+- The entire desktop admin shell is now fixed to the viewport across all admin routes. Sidebar and top bar stay in place; long pages scroll inside the right-hand main panel. Billing and Dashboard retain their own inner list/card scroll areas. Route changes reset the main panel to the top.
+- Navigation groups keep their natural height in the sidebar's scroll region, with Settings immediately after Announcements and the account footer separate.
+- Validation used the actual LAN URL `http://172.20.10.4:3000` and mouse-wheel input, including a 1516×686 viewport at 1.25 device scale to match the owner's screenshot. At that size, plus 1366×768, 1280×600 and 1024×768, the document remained one viewport tall, window scroll stayed zero, sidebar top stayed zero, and the Billing heading stayed fixed while invoice rows scrolled. Reports scrolled only in the right panel, navigation reset that panel, and phone menu order passed. Screenshots are in gitignored `test-results/admin-frame-review/`.
+- `npm run verify` passed: 166 unit/database tests, typecheck, lint, security scan and production build. The owner's existing server on port 3000 was left running.
+
+## Sidebar reference match (2026-11-03)
+
+- Matched the owner's latest sidebar reference: Settings is a separate, unlabelled navigation group with a 24 px gap after Announcements. It follows that group naturally rather than being pinned with an automatic top margin.
+- Tightened desktop footer spacing so the complete Settings row and account footer fit at the reference's laptop height. The fixed desktop frame and invoice-only scrolling remain in place.
+- Verified on the actual LAN URL at 1516×686 and 1.25 device scale with Rooms & beds selected, plus invoice wheel scrolling and phone Settings navigation. Screenshot: gitignored `test-results/sidebar-reference.png`. `npm run verify` passed with 166 tests, typecheck, lint, security scan and build.
+
 ## Next steps (pick up here)
 
-1. **Choose an SMTP provider** for invitation/reset emails (owner decision, may cost money), then configure sender/domain and the templates in `supabase/templates/`. Test an invitation, first-password setup and password recovery with an inbox the owner controls.
-2. Exercise live uploads and payment-proof review on the dev project: submit as a boarder, open as staff, verify private access and signed URL expiry, then approve/reject and inspect the resulting bill/receipt. Also test a maintenance photo.
-3. Test PWA installation/offline behaviour on a physical phone and complete the visual review of the remaining screens and dialogs.
-4. For future verification, build first, then run the live suite. In PowerShell: `npm.cmd run build`, then `$env:E2E_SUPABASE='1'; npm.cmd run test:e2e -- --workers=2`. If managing the production server separately, start `node node_modules/next/dist/bin/next start -p 3100` and set `$env:E2E_BASE_URL='http://localhost:3100'` for the test command.
-5. Later: production Supabase project in Singapore, Vercel deploy (needs owner approval), provision the first landlord.
-6. Optional: revoke `SUPABASE_ACCESS_TOKEN` in the Supabase dashboard once CLI work is done.
+1. Test a fresh invitation, first-password setup and recovery from the owner's real inbox using the default email provider. For the already-confirmed failed invite, use the recovery path above; old email links may already be consumed.
+2. **Choose an SMTP provider** (owner decision, may cost money), then configure sender/domain and the templates in `supabase/templates/`.
+3. Exercise live uploads and payment-proof review on the dev project: submit as a boarder, open as staff, verify private access and signed URL expiry, then approve/reject and inspect the resulting bill/receipt. Also test a maintenance photo.
+4. Test PWA installation/offline behaviour on a physical phone and complete the visual review of the remaining screens and dialogs.
+5. For future verification, build first, then run the live suite. In PowerShell: `npm.cmd run build`, then `$env:E2E_SUPABASE='1'; npm.cmd run test:e2e -- --workers=2`. If managing the production server separately, start `node node_modules/next/dist/bin/next start -p 3100` and set `$env:E2E_BASE_URL='http://localhost:3100'` for the test command.
+6. Later: production Supabase project in Singapore, Vercel deploy (needs owner approval), provision the first landlord.
+7. Optional: revoke `SUPABASE_ACCESS_TOKEN` in the Supabase dashboard once CLI work is done.
 
 Existing demo logins use password `DemoPass2026`: `admin@demo.rentora`, `boarder1@demo.rentora`, `boarder2@demo.rentora` (see `scripts/seed-demo.ts`). The project is already seeded; the script is not a reset or resumable seed.

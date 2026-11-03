@@ -59,7 +59,7 @@ export async function requestPasswordReset(input: unknown): Promise<ActionResult
     });
   }
   // Identical response whether or not the account exists, or the limit was hit.
-  return { ok: true, data: null, message: "If an account uses that email, a reset link is on its way. It expires in 24 hours." };
+  return { ok: true, data: null, message: "If an account uses that email, a reset link is on its way. Use the latest email; its link works only once." };
 }
 
 const setPasswordSchema = z

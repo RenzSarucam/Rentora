@@ -25,6 +25,7 @@ Keep keys separate per environment. Never point a preview deployment at the prod
 4. **Auth → Policies / Passwords**: minimum length 10; require lowercase, uppercase and digits; enable leaked-password protection (Pro).
 5. **Auth → URL configuration**: Site URL `https://<your-domain>`; Redirect URLs: `https://<your-domain>/auth/confirm` (dev: `http://localhost:3000/auth/confirm`).
 6. **Auth → Email templates**: paste `supabase/templates/invite.html`, `recovery.html`, `confirmation.html`, `email_change.html` (they link to `/auth/confirm?token_hash=…`).
+   If the built-in email provider rejects template changes, the app also supports its default verification links: invitation sessions returned in URL fragments and password recovery using PKCE codes. Customize templates after configuring SMTP. Open a PKCE reset link in the same browser that requested it.
 7. **Auth → SMTP**: configure a custom SMTP sender (e.g. Resend, Postmark, Amazon SES). The built-in sender is limited to a few emails per hour. *(May incur cost — owner decision.)*
 8. **Auth → Rate limits**: keep defaults or tighten sign-in/verification limits.
 9. **Storage**: confirm buckets `payment-proofs` and `maintenance-photos` exist and are **private** (created by migration 04).

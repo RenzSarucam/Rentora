@@ -13,17 +13,19 @@ const columns: Column<InvoiceListItem>[] = [
   {
     accessorKey: "number",
     header: "Invoice",
+    meta: { className: "whitespace-nowrap" },
     cell: ({ row }) => (
       <Link href={`/admin/billing/${row.original.id}`} className="font-mono text-[13px] hover:underline">
         {row.original.number}
       </Link>
     ),
   },
-  { accessorKey: "boarder", header: "Boarder" },
-  { accessorKey: "periodLabel", header: "For" },
+  { accessorKey: "boarder", header: "Boarder", meta: { className: "whitespace-nowrap" } },
+  { accessorKey: "periodLabel", header: "For", meta: { className: "whitespace-nowrap" } },
   {
     accessorKey: "dueDate",
     header: "Due",
+    meta: { className: "whitespace-nowrap" },
     cell: ({ row }) => (
       <span className={cn(row.original.overdue && "font-medium text-negative")}>{formatDate(row.original.dueDate)}</span>
     ),
@@ -80,8 +82,8 @@ export function InvoiceTable({ invoices, months }: { invoices: InvoiceListItem[]
   );
 
   return (
-    <>
-      <div role="tablist" aria-label="Filter by status" className="mb-4 flex gap-5 overflow-x-auto border-b border-border">
+    <div className="lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
+      <div role="tablist" aria-label="Filter by status" className="mb-4 flex shrink-0 gap-5 overflow-x-auto overflow-y-hidden border-b border-border">
         {STATUS_FILTERS.map((f) => (
           <button
             key={f.value}
@@ -100,6 +102,8 @@ export function InvoiceTable({ invoices, months }: { invoices: InvoiceListItem[]
         ))}
       </div>
       <DataTable
+        fitViewport
+        scrollLabel="Invoices"
         data={rows}
         columns={columns}
         searchPlaceholder="Search invoice or boarder"
@@ -122,6 +126,6 @@ export function InvoiceTable({ invoices, months }: { invoices: InvoiceListItem[]
           </select>
         }
       />
-    </>
+    </div>
   );
 }
