@@ -1,26 +1,173 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  Rentora design tokens — "framed sheet" direction.
+  A warm-white frame holds the navigation; the work sits on white sheets.
+  Deep navy is the ink and the one primary action. Teal is reserved for data and the selected state.
+*/
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+  --font-heading: var(--font-plex-sans);
+
+  --color-ground: var(--ground);
+  --color-raised: var(--raised);
+  --color-active: var(--active);
+  --color-rule: var(--rule);
+  --color-control: var(--control);
+  --color-teal: var(--teal);
+  --color-teal-soft: var(--teal-soft);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --color-warning: var(--warning);
+  --color-pill-positive-bg: var(--pill-positive-bg);
+  --color-pill-positive-ink: var(--pill-positive-ink);
+  --color-pill-negative-bg: var(--pill-negative-bg);
+  --color-pill-negative-ink: var(--pill-negative-ink);
+  --color-pill-warning-bg: var(--pill-warning-bg);
+  --color-pill-warning-ink: var(--pill-warning-ink);
+  --color-pill-neutral-bg: var(--pill-neutral-bg);
+  --color-pill-neutral-ink: var(--pill-neutral-ink);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 20px;
+  --radius-4xl: 999px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* Frame and surfaces */
+  --ground: #f6f5f1;          /* warm white frame */
+  --background: #ffffff;      /* the sheet */
+  --raised: #f4f4f2;
+  --active: #ebebe7;
+  --border: #e6e6e2;
+  --rule: #efefeb;
+  --control: #cfd0d3;
+
+  /* Ink: deep navy, three tiers that all pass 4.5:1 on white and on the frame */
+  --foreground: #14213a;
+  --muted-foreground: #586073;
+
+  --primary: #172a46;         /* the one filled action */
+  --primary-foreground: #ffffff;
+  --teal: #1b6c80;            /* data + selected state only */
+  --teal-soft: #e3eff2;
+
+  --positive: #1e7b4f;
+  --negative: #c4242a;
+  --warning: #92400e;
+  --pill-positive-bg: #dcf5e6;
+  --pill-positive-ink: #0b3b22;
+  --pill-negative-bg: #ffedea;
+  --pill-negative-ink: #831c1e;
+  --pill-warning-bg: #fdf3dc;
+  --pill-warning-ink: #7a3a0c;
+  --pill-neutral-bg: #ebebe7;
+  --pill-neutral-ink: #353a45;
+
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+  --popover: #ffffff;
+  --popover-foreground: var(--foreground);
+  --secondary: var(--raised);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--raised);
+  --accent: var(--raised);
+  --accent-foreground: var(--foreground);
+  --destructive: var(--negative);
+  --input: var(--control);
+  --ring: #1b6c80;
+  --radius: 8px;
+
+  --chart-1: #1b6c80;
+  --chart-2: #9aa3b2;
+  --chart-3: #a86f0c;
+  --chart-4: #172a46;
+  --chart-5: #cfd0d3;
+
+  --sidebar: var(--ground);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-accent: var(--active);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: #ffffff;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-ground text-foreground antialiased;
+    font-feature-settings: "kern";
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--teal-soft);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility num {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
 }

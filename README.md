@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rentora
 
-## Getting Started
+Boarding house management for Philippine landlords: rooms and beds, boarders, monthly billing in PHP, payment-proof verification, receipts, repairs and announcements. Desktop admin app + installable mobile app for boarders.
 
-First, run the development server:
+## Quick start (development)
 
-```bash
+```
+npm install
+cp .env.example .env.local          # fill in your *development* Supabase project
+npx supabase link --project-ref <dev-ref> && npx supabase db push
+npm run seed:demo -- --dev          # optional demo data (dev projects only)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sign in at http://localhost:3000 (demo: `owner@demo.rentora.test` / `DemoPass2026`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Checks
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+npm run verify       # typecheck, lint, tests (unit + database), security scan, production build
+npm run test:e2e     # Playwright against the production build
+```
 
-## Learn More
+## Docs
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Architecture](docs/architecture.md)
+- [Database](docs/database.md)
+- [Security](docs/security.md)
+- [Deployment](docs/deployment.md)
+- [Progress](docs/progress.md)
