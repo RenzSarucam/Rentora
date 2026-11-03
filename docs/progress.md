@@ -35,8 +35,21 @@ Status as of 2026-10-31.
 - PWA installability and service worker behaviour on real devices.
 - Rate limits are not load-tested.
 
-## Next steps to reach a controlled pilot
+## Supabase dev project (2026-11-03)
 
-1. Create the Supabase dev project, `supabase db push`, configure Auth per `docs/deployment.md`.
-2. `npm run seed:demo -- --dev`, then `E2E_SUPABASE=1 npm run test:e2e` and a manual walkthrough on desktop and a phone.
-3. Fix anything found, then repeat on a production project and provision the first landlord.
+- Dev project created (region: Ireland / eu-west-1 — fine for dev; use Singapore for production) and linked with the CLI.
+- `.env.local` filled (gitignored): URL, publishable key, secret key, plus `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD` for the CLI.
+- `supabase db push --linked` applied migrations 0001, 0002, 0003, 0004, 0030 with no errors.
+- Live check as an anonymous caller: organizations, profiles, invoices, payments, audit_logs → 401 permission denied; staff and server-only RPCs not reachable; storage bucket list empty (private).
+
+## Next steps (pick up here)
+
+1. **Seed demo data** — the owner runs it in their own terminal (an agent's safety check blocked the override flag):
+   `npm run seed:demo -- --dev --i-understand-this-is-not-production`
+   Demo logins use password `DemoPass2026`: `owner@demo.rentora.test`, `ana.reyes@demo.rentora.test`, `paolo.cruz@demo.rentora.test` (see `scripts/seed-demo.ts`).
+2. **Confirm Auth settings** in the dashboard: sign-ups off, confirm email on, Site URL `http://localhost:3000`, redirect URL `http://localhost:3000/auth/confirm`.
+3. `npm run dev`, sign in as the owner and a boarder; walk through every admin and boarder screen on desktop and a phone. Watch for PostgREST embed errors in nested selects (not covered by PGlite tests).
+4. `npm run build` then `E2E_SUPABASE=1 npm run test:e2e` to run the 10 seeded-flow tests.
+5. Choose an SMTP provider for invitation/reset emails (owner decision, may cost money).
+6. Later: production Supabase project in Singapore, Vercel deploy (needs owner approval), provision the first landlord.
+7. Optional: revoke `SUPABASE_ACCESS_TOKEN` in the Supabase dashboard once CLI work is done.
