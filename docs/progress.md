@@ -2,6 +2,8 @@
 
 Status as of 2026-11-03.
 
+**Current data state:** `rentora-dev` was cleared at the owner's request after confirmation that every existing account/record, including the Gmail boarder, was testing. The only current login is `admin@rentora.com` (Rentora Admin, active owner). Demo login details and seeded walkthroughs below are historical. Use a separate disposable project for future seeded browser tests.
+
 | Phase | Scope | Status |
 | --- | --- | --- |
 | 1 | Next.js 16.4 + TS strict + Tailwind v4 + shadcn/ui (radix); skills reviewed; architecture; design direction "framed sheet" (IBM Plex, navy / warm white / teal) | Done |
@@ -187,14 +189,22 @@ The hosted test run used a separately started production server with `E2E_BASE_U
 - The fallback disappears when content is ready, with no artificial delay. Form submission buttons retain their existing pending/disabled behavior.
 - Full verification passed with 187 unit/database tests, typecheck, lint, security scan (18 tables/55 SQL functions) and production build. Browser checks validated actual streamed loading, centering, animation and removal at phone 393x852, tablet 768x1024 and admin 1440x900, plus isolated responsive/reduced-motion checks. All 14 selected desktop/phone security and protected-detail-route regressions passed. The owner's existing dev server was left running.
 
+## Clean workspace and README handoff (2026-11-03)
+
+- The owner explicitly confirmed that all seven existing accounts and all boarding-house records were test data. Verified the linked/configured project is `rentora-dev`; no production project was touched. The inventory had four rooms, eleven beds, twelve invoices, seven payments, one announcement and one repair request, with no stored uploads.
+- Created the requested `admin@rentora.com` login with the password supplied privately by the owner. An operator-only, inventory-checked transaction cleared the 18 app tables and removed the seven old Auth users, then called the existing `provision_organization` RPC to create Rentora / Main house / Davao City with Rentora Admin as its active owner. A rollback dry run passed before commit. Schemas, migrations, RLS, grants and append-only triggers were preserved; no cleanup endpoint or reset migration was added.
+- Post-cleanup inventory confirms one Auth user, one profile/member, one organization/property and zero rooms, beds, boarders, assignments, invitations, invoices/items, payments/allocations/submissions, announcements/reads and maintenance requests/updates. Three fresh provisioning audit entries remain. The encrypted pre-cleanup application snapshot is in gitignored `.backups/rentora-dev-before-cleanup-2026-11-03.dpapi`, protected for this Windows account with DPAPI; the temporary bootstrap password was removed from the local environment file.
+- Updated README with the existing logo (including its light background for dark-mode readability), product explanation, owner/boarder features, local setup, verification, project structure and deployment links. No current login password is documented. `.backups/` is gitignored.
+- Validation: `npm run verify` passed (187 unit/database tests, typecheck, lint, security scan and production build). Actual browser sign-in with the new admin passed; all nine other admin screens loaded with empty data, desktop/mobile account details showed the new identity, and no browser errors/phone overflow were observed. Screenshots are in gitignored `test-results/clean-admin-review/`. Deployment has not been started.
+
 ## Next steps (pick up here)
 
-1. Test a fresh invitation, first-password setup and recovery from the owner's real inbox using the default email provider. For the already-confirmed failed invite, use the recovery path above; old email links may already be consumed.
+1. Test a fresh invitation, first-password setup and recovery using a dedicated development test account. The earlier failed Gmail invite/account was removed in the confirmed cleanup; previous email links should not be reused.
 2. **Choose an SMTP provider** (owner decision, may cost money), then configure sender/domain and the templates in `supabase/templates/`.
 3. Exercise live uploads and payment-proof review on the dev project: submit as a boarder, open as staff, verify private access and signed URL expiry, then approve/reject and inspect the resulting bill/receipt. Also test a maintenance photo.
 4. Test PWA installation/offline behaviour on a physical phone and complete the visual review of the remaining screens and dialogs.
-5. For future verification, build first, then run the live suite. In PowerShell: `npm.cmd run build`, then `$env:E2E_SUPABASE='1'; npm.cmd run test:e2e -- --workers=2`. If managing the production server separately, start `node node_modules/next/dist/bin/next start -p 3100` and set `$env:E2E_BASE_URL='http://localhost:3100'` for the test command.
+5. For future seeded live verification, use a **separate disposable dev project**; the current `rentora-dev` workspace is intentionally empty and its demo accounts no longer exist. Build first, then run the live suite against that test environment. In PowerShell: `npm.cmd run build`, then `$env:E2E_SUPABASE='1'; npm.cmd run test:e2e -- --workers=2`. If managing the production server separately, start `node node_modules/next/dist/bin/next start -p 3100` and set `$env:E2E_BASE_URL='http://localhost:3100'` for the test command.
 6. Later: production Supabase project in Singapore, Vercel deploy (needs owner approval), provision the first landlord.
 7. Optional: revoke `SUPABASE_ACCESS_TOKEN` in the Supabase dashboard once CLI work is done.
 
-Existing demo logins use password `DemoPass2026`: `admin@demo.rentora`, `boarder1@demo.rentora`, `boarder2@demo.rentora` (see `scripts/seed-demo.ts`). The project is already seeded; the script is not a reset or resumable seed.
+Current admin: `admin@rentora.com`; use the password supplied by the owner. The demo seeder remains available only for a separate disposable test project; do not run it on this clean workspace or production.
