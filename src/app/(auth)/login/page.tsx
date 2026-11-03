@@ -13,9 +13,14 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
 
   return (
     <>
-      <h1 className="text-[22px] font-semibold tracking-[-0.01em]">Sign in</h1>
-      <p className="mt-1 mb-6 text-sm text-muted-foreground">Landlords and boarders use the same sign-in.</p>
+      <p className="mb-2 text-xs font-medium text-muted-foreground">Welcome back</p>
+      <h1 className="text-[30px] leading-tight font-semibold tracking-[-0.025em]">Sign in</h1>
+      <p className="mt-2 mb-7 text-sm leading-6 text-muted-foreground">Use your landlord or boarder account to continue.</p>
       <LoginForm next={next} linkError={params.error === "link"} />
+      <div className="mt-7 border-t border-border pt-5 text-xs leading-5 text-muted-foreground">
+        <p className="font-medium text-foreground">New to your boarding house?</p>
+        <p>Ask your landlord for an invitation to get started.</p>
+      </div>
     </>
   );
 }

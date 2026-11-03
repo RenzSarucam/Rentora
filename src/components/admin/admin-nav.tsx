@@ -15,10 +15,16 @@ import {
   Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Item = { href: string; label: string; icon: React.ComponentType<{ className?: string }>; count?: number };
 
-export function AdminNav({ pendingPayments, openRequests, onNavigate }: { pendingPayments: number; openRequests: number; onNavigate?: () => void }) {
+export function AdminNav({ pendingPayments, openRequests, onNavigate, collapsed = false }: {
+  pendingPayments: number;
+  openRequests: number;
+  onNavigate?: () => void;
+  collapsed?: boolean;
+}) {
   const pathname = usePathname();
   const groups: { label?: string; items: Item[] }[] = [
     { items: [{ href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard }] },
@@ -51,25 +57,43 @@ export function AdminNav({ pendingPayments, openRequests, onNavigate }: { pendin
   const link = (item: Item) => {
     const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
     const Icon = item.icon;
+    const count = item.count ?? 0;
+    const content = (
+      <Link
+        href={item.href}
+        onClick={onNavigate}
+        aria-current={active ? "page" : undefined}
+        className={cn(
+          "relative flex items-center rounded-md text-sm text-muted-foreground transition-colors hover:bg-active/70 hover:text-foreground",
+          collapsed ? "h-10 w-10 justify-center" : "h-8 gap-2.5 px-2.5",
+          active && "bg-active font-medium text-foreground",
+        )}
+      >
+        <Icon className={cn("shrink-0", collapsed ? "size-5" : "size-4")} aria-hidden />
+        <span className={collapsed ? "sr-only" : "flex-1"}>{item.label}</span>
+        {count > 0 && (
+          <span
+            className={cn(
+              "num rounded-full bg-negative font-medium text-white",
+              collapsed ? "absolute top-0 right-0 min-w-4 px-1 text-center text-[9px] leading-4" : "px-1.5 text-[11px] leading-[18px]",
+            )}
+            aria-label={`${count} waiting`}
+          >
+            {count > 99 ? "99+" : count}
+          </span>
+        )}
+      </Link>
+    );
     return (
       <li key={item.href}>
-        <Link
-          href={item.href}
-          onClick={onNavigate}
-          aria-current={active ? "page" : undefined}
-          className={cn(
-            "flex h-8 items-center gap-2.5 rounded-md px-2.5 text-sm text-muted-foreground transition-colors hover:bg-active/70 hover:text-foreground",
-            active && "bg-active font-medium text-foreground",
-          )}
-        >
-          <Icon className="size-4 shrink-0" aria-hidden />
-          <span className="flex-1">{item.label}</span>
-          {item.count ? (
-            <span className="num rounded-full bg-primary px-1.5 text-[11px] leading-[18px] font-medium text-primary-foreground" aria-label={`${item.count} waiting`}>
-              {item.count}
-            </span>
-          ) : null}
-        </Link>
+        {collapsed ? (
+          <Tooltip>
+            <TooltipTrigger asChild>{content}</TooltipTrigger>
+            <TooltipContent side="right" sideOffset={8}>
+              {item.label}{count > 0 ? ` · ${count} waiting` : ""}
+            </TooltipContent>
+          </Tooltip>
+        ) : content}
       </li>
     );
   };
@@ -77,8 +101,8 @@ export function AdminNav({ pendingPayments, openRequests, onNavigate }: { pendin
   return (
     <nav aria-label="Admin" className="flex min-h-0 flex-1 flex-col overflow-y-auto">
       {groups.map((group, i) => (
-        <div key={i} className={cn("shrink-0", i > 0 && "mt-6")}>
-          {group.label && <p className="mb-1.5 px-2.5 text-xs text-muted-foreground">{group.label}</p>}
+        <div key={i} className={cn("shrink-0", i > 0 && (collapsed ? "mt-3" : "mt-6"))}>
+          {group.label && !collapsed && <p className="mb-1.5 px-2.5 text-xs text-muted-foreground">{group.label}</p>}
           <ul className="grid gap-0.5">{group.items.map(link)}</ul>
         </div>
       ))}

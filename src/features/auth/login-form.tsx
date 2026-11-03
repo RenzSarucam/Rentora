@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,6 +16,7 @@ type Values = z.input<typeof schema>;
 
 export function LoginForm({ next, linkError }: { next?: string; linkError?: boolean }) {
   const [pending, startTransition] = useTransition();
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(linkError ? "That link is invalid or has expired. Request a new one." : null);
   const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { email: "", password: "" } });
 
@@ -27,20 +29,36 @@ export function LoginForm({ next, linkError }: { next?: string; linkError?: bool
   });
 
   return (
-    <form onSubmit={onSubmit} noValidate className="grid gap-4">
+    <form onSubmit={onSubmit} noValidate className="grid gap-5">
       <FormError message={error} />
       <Field label="Email" error={form.formState.errors.email?.message}>
-        {(p) => <Input {...p} type="email" autoComplete="email" inputMode="email" className="h-11" {...form.register("email")} />}
+        {(p) => <Input {...p} type="email" autoComplete="email" inputMode="email" placeholder="you@example.com" spellCheck={false} autoCapitalize="none" className="h-12 rounded-md bg-background px-3" {...form.register("email")} />}
       </Field>
-      <Field label="Password" error={form.formState.errors.password?.message}>
-        {(p) => <Input {...p} type="password" autoComplete="current-password" className="h-11" {...form.register("password")} />}
-      </Field>
-      <SubmitButton pending={pending} className="mt-1 h-11 w-full text-[15px]">
-        Sign in
+      <div className="relative">
+        <Field label="Password" error={form.formState.errors.password?.message}>
+          {(p) => (
+            <div className="relative">
+              <Input {...p} type={showPassword ? "text" : "password"} autoComplete="current-password" className="h-12 rounded-md bg-background pr-12 pl-3" {...form.register("password")} />
+              <button
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+                aria-controls={p.id}
+                className="absolute top-1 right-1 inline-flex size-10 items-center justify-center rounded-sm text-muted-foreground hover:bg-raised hover:text-foreground"
+              >
+                {showPassword ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+              </button>
+            </div>
+          )}
+        </Field>
+        <Link href="/forgot-password" className="absolute top-0 right-0 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+          Forgot your password?
+        </Link>
+      </div>
+      <SubmitButton pending={pending} className="relative mt-1 h-12 w-full justify-center rounded-md px-12 text-[15px] [&>.animate-spin]:absolute [&>.animate-spin]:left-4">
+        <span>Sign in</span><ArrowRight className="absolute top-1/2 right-4 size-4 -translate-y-1/2" aria-hidden />
       </SubmitButton>
-      <Link href="/forgot-password" className="justify-self-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-        Forgot your password?
-      </Link>
     </form>
   );
 }
