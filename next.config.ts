@@ -11,6 +11,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: process.env.RENTORA_DEV_HOST ? [process.env.RENTORA_DEV_HOST] : [],
+  // Next dev includes action arguments by default; sign-in arguments contain passwords.
+  logging: { serverFunctions: false },
   // Every screen is per-user financial data: render per request, cache nothing on the server.
   cacheComponents: false,
   poweredByHeader: false,

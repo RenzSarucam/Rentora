@@ -5,9 +5,9 @@
  *   npm run seed:demo -- --dev
  *
  * Logins (password for all: DemoPass2026):
- *   owner@demo.rentora.test        landlord
- *   ana.reyes@demo.rentora.test    boarder (Room 101, Bed A)
- *   paolo.cruz@demo.rentora.test   boarder (Room 101, Bed B)
+ *   admin@demo.rentora        landlord
+ *   boarder1@demo.rentora    boarder (Room 101, Bed A)
+ *   boarder2@demo.rentora   boarder (Room 101, Bed B)
  */
 import { config } from "dotenv";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
@@ -48,7 +48,7 @@ async function main() {
   if (!url || !secret || !publishable) throw new Error("Missing Supabase env vars.");
   const admin = createClient(url, secret, { auth: { persistSession: false } });
 
-  const ownerId = await user(admin, "owner@demo.rentora.test", "Maria Santos");
+  const ownerId = await user(admin, "admin@demo.rentora", "Maria Santos");
   const orgId = await must(
     admin.rpc("provision_organization", {
       p_name: "Santos Boarding House",
@@ -56,11 +56,11 @@ async function main() {
       p_property_address: "1147 P. Noval St, Sampaloc, Manila",
       p_owner: ownerId,
       p_owner_name: "Maria Santos",
-      p_owner_email: "owner@demo.rentora.test",
+      p_owner_email: "admin@demo.rentora",
     }),
     "provision",
   );
-  const owner = await signedIn("owner@demo.rentora.test");
+  const owner = await signedIn("admin@demo.rentora");
   const property = (await must(owner.from("properties").select("id").single<{ id: string }>(), "property"))!;
 
   const roomSpecs = [
@@ -79,8 +79,8 @@ async function main() {
   const bed = (room: string, label: string) => beds.find((b) => b.rooms.code === room && b.label === label)!;
 
   const boarders = [
-    { email: "ana.reyes@demo.rentora.test", name: "Ana Reyes", room: "101", bed: "Bed A", moveIn: "2026-06-01" },
-    { email: "paolo.cruz@demo.rentora.test", name: "Paolo Cruz", room: "101", bed: "Bed B", moveIn: "2026-07-15" },
+    { email: "boarder1@demo.rentora", name: "Ana Reyes", room: "101", bed: "Bed A", moveIn: "2026-06-01" },
+    { email: "boarder2@demo.rentora", name: "Paolo Cruz", room: "101", bed: "Bed B", moveIn: "2026-07-15" },
     { email: "jasmine.villanueva@demo.rentora.test", name: "Jasmine Villanueva", room: "102", bed: "Bed A", moveIn: "2026-06-01" },
     { email: "kevin.delarosa@demo.rentora.test", name: "Kevin dela Rosa", room: "102", bed: "Bed B", moveIn: "2026-08-01" },
     { email: "mika.bautista@demo.rentora.test", name: "Mika Bautista", room: "201", bed: "Bed A", moveIn: "2026-09-01" },
@@ -110,7 +110,7 @@ async function main() {
     );
     if (sep) await must(owner.rpc("record_payment", { p_member: members[b.email], p_amount_centavos: sep.total_centavos, p_method: "cash", p_reference: "", p_received_on: "2026-09-04", p_notes: "", p_invoice: sep.id }), "pay sep");
   }
-  await must(owner.rpc("record_payment", { p_member: members["ana.reyes@demo.rentora.test"], p_amount_centavos: 450000, p_method: "gcash", p_reference: "GC-8841-2207", p_received_on: "2026-10-03", p_notes: "", p_invoice: null }), "pay oct");
+  await must(owner.rpc("record_payment", { p_member: members["boarder1@demo.rentora"], p_amount_centavos: 450000, p_method: "gcash", p_reference: "GC-8841-2207", p_received_on: "2026-10-03", p_notes: "", p_invoice: null }), "pay oct");
   await must(owner.rpc("record_payment", { p_member: members["jasmine.villanueva@demo.rentora.test"], p_amount_centavos: 150000, p_method: "cash", p_reference: "", p_received_on: "2026-10-06", p_notes: "Partial", p_invoice: null }), "partial oct");
 
   await must(
@@ -123,13 +123,13 @@ async function main() {
     }),
     "announcement",
   );
-  const paolo = await signedIn("paolo.cruz@demo.rentora.test");
+  const paolo = await signedIn("boarder2@demo.rentora");
   await must(
-    paolo.from("maintenance_requests").insert({ member_id: members["paolo.cruz@demo.rentora.test"], title: "Aircon not cooling", description: "The aircon in Room 101 runs but blows warm air since Tuesday.", priority: "normal" }),
+    paolo.from("maintenance_requests").insert({ member_id: members["boarder2@demo.rentora"], title: "Aircon not cooling", description: "The aircon in Room 101 runs but blows warm air since Tuesday.", priority: "normal" }),
     "maintenance",
   );
 
-  console.log("Demo data ready. Sign in with owner@demo.rentora.test / " + PASSWORD);
+  console.log("Demo data ready. Sign in with admin@demo.rentora / " + PASSWORD);
 }
 
 main().catch((e) => {

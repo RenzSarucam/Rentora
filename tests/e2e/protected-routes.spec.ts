@@ -54,6 +54,15 @@ test.describe("request security", () => {
     expect(noOrigin.status()).toBe(403);
   });
 
+  test("auth redirects keep the browser's origin", async ({ request, baseURL }) => {
+    const signout = await request.post("/auth/signout", { headers: { origin: baseURL! }, maxRedirects: 0 });
+    expect(signout.status()).toBe(303);
+    expect(signout.headers().location).toBe("/login");
+    const confirm = await request.get("/auth/confirm?token_hash=forged&type=recovery", { maxRedirects: 0 });
+    expect(confirm.status()).toBe(303);
+    expect(confirm.headers().location).toBe("/login?error=link");
+  });
+
   test("an invalid email link lands on sign-in with an error", async ({ page }) => {
     await page.goto("/auth/confirm?token_hash=forged&type=recovery&next=https://evil.example");
     await expect(page).toHaveURL(/\/login\?error=link/);

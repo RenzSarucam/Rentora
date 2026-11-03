@@ -10,7 +10,7 @@ const ALLOWED_TYPES: EmailOtpType[] = ["invite", "recovery", "email", "signup", 
  * Email templates link here with ?token_hash=...&type=...&next=... (see supabase/templates).
  */
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const next = safeNextPath(searchParams.get("next"), "/");
@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
     if (!error) {
       const destination = type === "invite" || type === "recovery" ? "/auth/set-password" : next;
-      return NextResponse.redirect(new URL(destination, origin), { status: 303 });
+      return new NextResponse(null, { status: 303, headers: { Location: destination } });
     }
   }
-  return NextResponse.redirect(new URL("/login?error=link", origin), { status: 303 });
+  return new NextResponse(null, { status: 303, headers: { Location: "/login?error=link" } });
 }

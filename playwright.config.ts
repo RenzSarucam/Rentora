@@ -1,4 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
+import { config } from "dotenv";
+
+// Only live-backend runs load local credentials; signed-out checks keep their isolated defaults.
+if (process.env.E2E_SUPABASE === "1") {
+  config({ path: ".env.local", quiet: true });
+  config({ quiet: true });
+  for (const key of ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "SUPABASE_SECRET_KEY"]) {
+    if (!process.env[key]) throw new Error(`Live Supabase tests require ${key}.`);
+  }
+}
 
 const PORT = Number(process.env.E2E_PORT ?? 3100);
 const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`;

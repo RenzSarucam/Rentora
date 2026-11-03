@@ -8,5 +8,6 @@ export async function POST(request: Request) {
   }
   const supabase = await createClient();
   await supabase.auth.signOut();
-  return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+  // Keep the browser's origin: the dev server's internal URL may use 0.0.0.0.
+  return new NextResponse(null, { status: 303, headers: { Location: "/login" } });
 }
