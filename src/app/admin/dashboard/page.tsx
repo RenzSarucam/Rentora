@@ -92,9 +92,9 @@ export default async function DashboardPage() {
         ))}
       </section>
 
-      <div className="grid gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_320px] lg:grid-rows-[minmax(0,3fr)_minmax(0,2fr)] xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div role="region" aria-label="Dashboard cards" tabIndex={0} className="grid gap-5 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_320px] lg:grid-rows-[minmax(min-content,3fr)_minmax(240px,2fr)] lg:overflow-y-auto lg:overscroll-contain xl:grid-cols-[minmax(0,1fr)_360px]">
         {/* The screen's question: is this month's rent coming in? */}
-        <section aria-labelledby="rent-heading" tabIndex={0} className="flex flex-col rounded-lg border border-border p-4 lg:min-h-0 lg:overflow-y-auto">
+        <section aria-labelledby="rent-heading" className="flex min-w-0 flex-col rounded-lg border border-border p-5 lg:min-h-[380px]">
           <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
             <div>
               <h2 id="rent-heading" className="text-base font-semibold">
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
               </div>
             </div>
           )}
-          <h3 className="mt-3 mb-2 shrink-0 text-sm font-medium text-muted-foreground">Payments received, last 6 months</h3>
+          <h3 className="mt-6 mb-3 shrink-0 text-sm font-medium text-muted-foreground">Payments received, last 6 months</h3>
           <CollectionsChart
             data={d.collections.map((c) => ({
               month: c.month,

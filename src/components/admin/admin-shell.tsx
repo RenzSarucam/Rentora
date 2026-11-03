@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { Menu, UserRound } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Wordmark } from "@/components/app/brand";
 import { cn } from "@/lib/utils";
 import { AdminNav } from "./admin-nav";
@@ -34,14 +35,6 @@ export function AdminShell({
     mainRef.current?.scrollTo(0, 0);
   }, [pathname]);
 
-  const account = (
-    <div className="mt-4 shrink-0 border-t border-border pt-3 lg:mt-3">
-      <p className="truncate px-2.5 text-sm font-medium text-foreground">{userName}</p>
-      <p className="truncate px-2.5 text-xs text-muted-foreground">{userEmail}</p>
-      <div className="mt-2">{signOut}</div>
-    </div>
-  );
-
   return (
     <div className="min-h-dvh bg-ground lg:fixed lg:inset-0 lg:grid lg:h-dvh lg:min-h-0 lg:grid-cols-[228px_minmax(0,1fr)] lg:grid-rows-[48px_minmax(0,1fr)] lg:overflow-hidden">
       {/* Sidebar: part of the tinted frame, no rule against the top bar. */}
@@ -53,10 +46,9 @@ export function AdminShell({
           </p>
         </div>
         <AdminNav pendingPayments={pendingPayments} openRequests={openRequests} />
-        {account}
       </aside>
 
-      {/* Top bar (desktop): scope on the left. Mobile: menu, product, org. */}
+      {/* Scope on the left, account controls on the right. */}
       <header className="sticky top-0 z-20 flex h-12 items-center gap-3 bg-ground px-4 lg:static lg:px-2">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
@@ -72,16 +64,38 @@ export function AdminShell({
             </div>
             <div className="flex h-[calc(100%-4rem)] flex-col">
               <AdminNav pendingPayments={pendingPayments} openRequests={openRequests} onNavigate={() => setOpen(false)} />
-              {account}
             </div>
           </SheetContent>
         </Sheet>
         <span className="lg:hidden">
           <Wordmark />
         </span>
-        <p className="hidden truncate text-sm text-muted-foreground lg:block">
+        <p className="hidden min-w-0 truncate text-sm text-muted-foreground lg:block">
           <span className="font-medium text-foreground">{orgName}</span> · Asia/Manila · PHP
         </p>
+        <div className="ml-auto hidden shrink-0 items-center gap-3 lg:flex">
+          <div className="max-w-56 text-right">
+            <p className="truncate text-sm font-medium text-foreground" title={userName}>{userName}</p>
+            <p className="truncate text-xs text-muted-foreground" title={userEmail}>{userEmail}</p>
+          </div>
+          <div className="shrink-0 border-l border-border pl-3">{signOut}</div>
+        </div>
+        <div className="ml-auto lg:hidden">
+          <Popover>
+            <PopoverTrigger asChild>
+              <button type="button" aria-label="Open account" className="inline-flex size-10 items-center justify-center rounded-md hover:bg-active">
+                <UserRound className="size-5" aria-hidden />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" aria-label="Account" className="w-64 border border-border bg-background p-3 shadow-none ring-0">
+              <div className="min-w-0">
+                <p className="truncate font-medium text-foreground" title={userName}>{userName}</p>
+                <p className="truncate text-xs text-muted-foreground" title={userEmail}>{userEmail}</p>
+              </div>
+              <div className="border-t border-border pt-2">{signOut}</div>
+            </PopoverContent>
+          </Popover>
+        </div>
       </header>
 
       {/* The sheet: white, inset 8px from the right and bottom, hairline edge, no shadow. */}

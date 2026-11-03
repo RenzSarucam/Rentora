@@ -3,8 +3,8 @@
   Safety rules: never cache signed-in pages, RSC payloads, API/auth routes, Supabase or any cross-origin
   request. Only hashed build assets and app icons are cached; navigations fall back to /offline when offline.
 */
-const VERSION = "rentora-v1";
-const PRECACHE = ["/offline", "/icons/icon-192.png", "/icons/icon-512.png", "/icons/maskable-512.png"];
+const VERSION = "rentora-v2-brand";
+const PRECACHE = ["/offline", "/icons/favicon.svg", "/icons/icon-192.png", "/icons/icon-512.png", "/icons/maskable-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

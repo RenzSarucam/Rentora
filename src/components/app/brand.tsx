@@ -1,13 +1,11 @@
 import { cn } from "@/lib/utils";
+import { BRAND_INK, BRAND_MARK_PATH, BRAND_VIEW_BOX } from "@/lib/brand-artwork";
 
-/** Rentora's mark: an arched boarding-house door with a teal latch. */
+/** Rentora's mark: a boarding house with an R-shaped doorway and window. */
 export function BrandMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={cn("size-6", className)} aria-hidden>
-      <rect width="24" height="24" rx="6" fill="#172a46" />
-      <path d="M7.5 19V11a4.5 4.5 0 0 1 9 0v8" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M5.5 19h13" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
-      <circle cx="14" cy="14.5" r="1.3" fill="#5fb3c6" />
+    <svg viewBox={BRAND_VIEW_BOX} className={cn("size-6 shrink-0", className)} aria-hidden>
+      <path d={BRAND_MARK_PATH} fill={BRAND_INK} fillRule="evenodd" clipRule="evenodd" />
     </svg>
   );
 }

@@ -23,7 +23,13 @@ export const metadata: Metadata = {
   applicationName: "Rentora",
   appleWebApp: { capable: true, title: "Rentora", statusBarStyle: "default" },
   robots: { index: false, follow: false },
-  icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
+  icons: {
+    icon: [
+      { url: "/favicon.ico?v=house-r", type: "image/x-icon", sizes: "16x16 32x32 48x48" },
+      { url: "/icons/favicon.svg?v=house-r", type: "image/svg+xml", sizes: "any" },
+    ],
+    apple: "/icons/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
