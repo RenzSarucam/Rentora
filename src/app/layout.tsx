@@ -4,6 +4,8 @@ import { connection } from "next/server";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
+import "./controls.css";
+import "./loading.css";
 
 const plexSans = IBM_Plex_Sans({
   variable: "--font-plex-sans",

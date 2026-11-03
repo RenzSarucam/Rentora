@@ -67,8 +67,8 @@ export function PropertyDialog({ property }: { property?: PropertyRow }) {
           <Field label="Name" error={form.formState.errors.name?.message}>
             {(p) => <Input {...p} placeholder="Dapitan annex" {...form.register("name")} />}
           </Field>
-          <Field label="Address" error={form.formState.errors.address?.message}>
-            {(p) => <Input {...p} placeholder="1234 Dapitan St., Sampaloc, Manila" {...form.register("address")} />}
+          <Field label="Address" hint="Shown in the top bar. Enter your boarding house's actual location." error={form.formState.errors.address?.message}>
+            {(p) => <Input {...p} placeholder="Street, barangay, city" {...form.register("address")} />}
           </Field>
           <DialogFooter>
             <SubmitButton pending={pending}>{property ? "Save" : "Add property"}</SubmitButton>

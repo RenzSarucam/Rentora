@@ -2,6 +2,8 @@ import type { PGlite, Transaction } from "@electric-sql/pglite";
 import { beforeAll, describe, expect, it } from "vitest";
 import { as, commitAs, createTestDb, one } from "./harness";
 import { assign, createOrg, type Org } from "./fixture";
+import { CHARGE_PRESETS } from "../../src/features/billing/charge-presets";
+import { newChargeSchema, signedAmount } from "../../src/features/billing/schemas";
 
 let db: PGlite;
 let org: Org;
@@ -105,6 +107,43 @@ describe("fees, discounts and deposits", () => {
       ).id;
       expect(await invoice(tx, id)).toMatchObject({ total_centavos: 350000, status: "open" });
     });
+  });
+
+  it("bills water, electricity and damage separately from rent with exact centavos", async () => {
+    const charge = newChargeSchema.parse({
+      memberId: org.boarders[0].memberId,
+      kind: CHARGE_PRESETS.water.invoiceKind,
+      dueDate: "2026-11-10",
+      items: [
+        { kind: CHARGE_PRESETS.water.lineKind, description: "Water bill · November", amount: "250.25" },
+        { kind: CHARGE_PRESETS.electricity.lineKind, description: "Electricity bill · November", amount: "450.50" },
+        { kind: CHARGE_PRESETS.damage.lineKind, description: "Damaged window replacement", amount: "1250.00" },
+        { kind: "discount", description: "Adjustment", amount: "50.00" },
+      ],
+    });
+    const lines = charge.items.map((item) => ({ kind: item.kind, description: item.description, amount_centavos: signedAmount(item.kind, item.amount) }));
+    await as(db, org.ownerId, async (tx) => {
+      const { id } = await one<{ id: string }>(tx, `select public.create_invoice($1, $2::public.invoice_kind, $3::date, $4::jsonb) as id`, [charge.memberId, charge.kind, charge.dueDate, JSON.stringify(lines)]);
+      expect(await invoice(tx, id)).toMatchObject({ total_centavos: 190075, status: "open" });
+      expect(await one(tx, `select kind::text, period_month from public.invoices where id = $1`, [id])).toMatchObject({ kind: "other", period_month: null });
+      const saved = await tx.query(`select kind::text, description, amount_centavos::int from public.invoice_items where invoice_id = $1`, [id]);
+      expect(saved.rows).toEqual(expect.arrayContaining(lines));
+      expect((await invoice(tx, invoiceId)).total_centavos).toBe(350000);
+    });
+  });
+
+  it("boarders cannot create their own utility charges", async () => {
+    await expect(as(db, org.boarders[0].userId, (tx) => tx.query(
+      `select public.create_invoice($1, 'other', '2026-11-10', $2::jsonb)`,
+      [org.boarders[0].memberId, JSON.stringify([{ kind: "fee", description: "Water bill", amount_centavos: 25000 }])],
+    ))).rejects.toThrow(/Not authorized/);
+  });
+
+  it("staff cannot charge utilities to another organization's boarder", async () => {
+    await expect(as(db, other.ownerId, (tx) => tx.query(
+      `select public.create_invoice($1, 'other', '2026-11-10', $2::jsonb)`,
+      [org.boarders[0].memberId, JSON.stringify([{ kind: "fee", description: "Electricity bill", amount_centavos: 45050 }])],
+    ))).rejects.toThrow(/Not authorized/);
   });
 });
 

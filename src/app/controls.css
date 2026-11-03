@@ -1,0 +1,21 @@
+/* Keep the arrow gutter consistent even when a dropdown has local px-* utilities.
+   Multi-selects and listboxes retain their native UI. */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  padding-inline: 0.75rem 2.5rem;
+  background-image: url("/icons/select-chevron.svg");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem 1rem;
+  text-overflow: ellipsis;
+}
+
+@media (forced-colors: active) {
+  select:not([multiple]):not([size]) {
+    appearance: auto;
+    background-image: none;
+    padding-inline-end: 0.75rem;
+  }
+}

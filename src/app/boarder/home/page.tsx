@@ -152,10 +152,10 @@ export default async function BoarderHome() {
           <List>
             {announcements.map((a) => (
               <li key={a.id} className="py-3">
-                <Link href={`/boarder/announcements#${a.id}`} className="block active:opacity-70">
+                <Link href={`/boarder/announcements/${a.id}`} className="block active:opacity-70">
                   <span className="flex items-center gap-2">
                     <span className="text-[15px] font-medium">{a.title}</span>
-                    {a.pinned && <StatusPill tone="accent">Pinned</StatusPill>}
+                    {a.isUnread ? <StatusPill tone="negative">Unread</StatusPill> : a.pinned && <StatusPill tone="accent">Pinned</StatusPill>}
                   </span>
                   <span className="mt-0.5 line-clamp-2 block text-sm text-muted-foreground">{a.body}</span>
                 </Link>

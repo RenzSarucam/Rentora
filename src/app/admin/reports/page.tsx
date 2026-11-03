@@ -5,9 +5,9 @@ import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader, SectionHeader } from "@/components/app/page-header";
 import { StatusPill } from "@/components/app/status-pill";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { listRooms } from "@/features/rooms/queries";
 import { CollectionsChart } from "@/features/reports/collections-chart";
+import { ReportFilters } from "@/features/reports/report-filters";
 import { agingSummary, balancesByBoarder, collectionsByMonth, overdueInvoices, sum, totalsByMethod } from "@/features/reports/compute";
 import { openInvoices, paymentsBetween, readRange } from "@/features/reports/queries";
 import { addMonths, formatDate, formatMonth } from "@/lib/dates";
@@ -31,7 +31,8 @@ function ExportLink({ kind, query = "" }: { kind: string; query?: string }) {
 }
 
 export default async function ReportsPage({ searchParams }: PageProps<"/admin/reports">) {
-  const range = readRange(await searchParams);
+  const params = await searchParams;
+  const range = readRange(params);
   const chartFrom = addMonths(range.currentMonth, -(range.months - 1));
   const [rooms, chartPayments, rangePayments, invoices] = await Promise.all([
     listRooms(),
@@ -66,42 +67,20 @@ export default async function ReportsPage({ searchParams }: PageProps<"/admin/re
         description={`Collected ${formatPeso(thisMonth.amount)} in ${formatMonth(range.currentMonth)} · ${formatPeso(sum(balances, (b) => b.balance))} still unpaid · ${formatPeso(sum(overdue, (o) => o.balance))} overdue`}
       />
 
-      <form method="get" className="mb-10 flex flex-wrap items-end gap-3 rounded-lg bg-raised px-4 py-3">
-        <label className="grid gap-1 text-xs text-muted-foreground">
-          Payments from
-          <Input type="date" name="from" defaultValue={range.from} className="h-9 w-40 bg-background" />
-        </label>
-        <label className="grid gap-1 text-xs text-muted-foreground">
-          to
-          <Input type="date" name="to" defaultValue={range.to} className="h-9 w-40 bg-background" />
-        </label>
-        <label className="grid gap-1 text-xs text-muted-foreground">
-          Collections chart
-          <select name="months" defaultValue={String(range.months)} className="h-9 rounded-md border border-input bg-background px-2.5 text-sm text-foreground">
-            <option value="6">Last 6 months</option>
-            <option value="12">Last 12 months</option>
-          </select>
-        </label>
-        <Button type="submit" variant="outline">
-          Apply
-        </Button>
-        <Link href="/admin/reports" className="ml-1 self-center text-sm text-muted-foreground hover:text-foreground hover:underline">
-          Reset
-        </Link>
-      </form>
+      <ReportFilters key={JSON.stringify([params.from, params.to, params.months])} range={range} />
 
-      <div className="grid gap-14">
+      <div className="grid min-w-0 gap-14 [&>section]:min-w-0">
         <section aria-labelledby="collections">
           <SectionHeader title={<span id="collections">Collections</span>} action={<ExportLink kind="collections" query={`?months=${range.months}`} />} />
-          <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-            <div className="rounded-lg border border-border p-5">
+          <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <div className="min-w-0 rounded-lg border border-border p-5">
               <p className="text-sm text-muted-foreground">Collected per month, last {range.months} months</p>
               <p className="num mt-1 mb-4 text-[28px] leading-none">
                 {formatPeso(thisMonth.amount)} <span className="text-sm text-muted-foreground">in {formatMonth(range.currentMonth)} so far</span>
               </p>
               <CollectionsChart data={chartData} currentMonth={range.currentMonth} />
             </div>
-            <div>
+            <div className="min-w-0 overflow-x-auto">
               <p className="mb-2 text-sm text-muted-foreground">
                 By method, {formatDate(range.from)} – {formatDate(range.to)}
               </p>

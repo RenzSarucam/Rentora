@@ -12,6 +12,7 @@ import { useActionForm } from "@/components/app/use-action-form";
 import { manilaToday } from "@/lib/dates";
 import { parsePesoToCentavos, formatPeso } from "@/lib/money";
 import { createCharge } from "./actions";
+import { CHARGE_PRESETS, chargeTypes, type ChargeType } from "./charge-presets";
 import type { BoarderOption } from "./queries";
 import { CHARGE_ITEM_LABELS, chargeItemKinds, newChargeSchema, signedAmount } from "./schemas";
 
@@ -20,6 +21,7 @@ const selectClass = "h-9 w-full rounded-md border border-input bg-background px-
 /** One-off charges outside monthly rent: security deposits, repairs, utilities. */
 export function NewChargeDialog({ boarders }: { boarders: BoarderOption[] }) {
   const [open, setOpen] = useState(false);
+  const [chargeType, setChargeType] = useState<ChargeType>("deposit");
   const defaults = () => ({
     memberId: boarders[0]?.memberId ?? "",
     kind: "deposit" as "deposit" | "other",
@@ -32,6 +34,7 @@ export function NewChargeDialog({ boarders }: { boarders: BoarderOption[] }) {
   const { onSubmit, pending, error } = useActionForm(form, createCharge, {
     onSuccess: () => {
       setOpen(false);
+      setChargeType("deposit");
       form.reset(defaults());
     },
   });
@@ -39,12 +42,28 @@ export function NewChargeDialog({ boarders }: { boarders: BoarderOption[] }) {
   const watched = useWatch({ control: form.control, name: "items" });
   const total = watched.reduce((sum, i) => sum + signedAmount(i.kind, parsePesoToCentavos(String(i.amount ?? "")) ?? 0), 0);
 
+  function chooseType(type: ChargeType) {
+    const previous = CHARGE_PRESETS[chargeType];
+    const preset = CHARGE_PRESETS[type];
+    const first = form.getValues("items.0");
+    setChargeType(type);
+    form.setValue("kind", preset.invoiceKind, { shouldDirty: true });
+    form.setValue("items.0.kind", preset.lineKind, { shouldDirty: true });
+    // Keep custom descriptions, entered amounts, notes and additional lines.
+    if (!first.description.trim() || first.description === previous.description) {
+      form.setValue("items.0.description", preset.description, { shouldDirty: true });
+    }
+  }
+
   return (
     <Dialog
       open={open}
       onOpenChange={(o) => {
         setOpen(o);
-        if (o) form.reset(defaults());
+        if (o) {
+          setChargeType("deposit");
+          form.reset(defaults());
+        }
       }}
     >
       <DialogTrigger asChild>
@@ -55,7 +74,7 @@ export function NewChargeDialog({ boarders }: { boarders: BoarderOption[] }) {
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>New charge</DialogTitle>
-          <DialogDescription>A separate invoice for a deposit or one-off charge. Monthly rent is billed with Generate invoices.</DialogDescription>
+          <DialogDescription>Bill utilities not included in rent, deposits, repairs or other separate charges. Monthly rent is billed with Generate invoices.</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} noValidate className="grid gap-4">
           <FormError message={error} />
@@ -73,9 +92,8 @@ export function NewChargeDialog({ boarders }: { boarders: BoarderOption[] }) {
             </Field>
             <Field label="Type" error={errors.kind?.message}>
               {(p) => (
-                <select {...p} className={selectClass} {...form.register("kind")}>
-                  <option value="deposit">Security deposit</option>
-                  <option value="other">Other charges</option>
+                <select {...p} className={selectClass} value={chargeType} onChange={(event) => chooseType(event.target.value as ChargeType)}>
+                  {chargeTypes.map((type) => <option key={type} value={type}>{CHARGE_PRESETS[type].label}</option>)}
                 </select>
               )}
             </Field>
@@ -83,11 +101,12 @@ export function NewChargeDialog({ boarders }: { boarders: BoarderOption[] }) {
               {(p) => <Input {...p} type="date" {...form.register("dueDate")} />}
             </Field>
           </div>
+          <p className="text-xs leading-5 text-muted-foreground">{CHARGE_PRESETS[chargeType].hint} Use Add line for each additional charge.</p>
 
           <fieldset className="grid gap-2">
             <legend className="mb-1 text-sm font-medium">Lines</legend>
             {items.fields.map((field, index) => (
-              <div key={field.id} className="grid grid-cols-[110px_1fr_120px_36px] items-start gap-2">
+              <div key={field.id} className="grid grid-cols-[minmax(0,1fr)_100px_36px] items-start gap-2 sm:grid-cols-[110px_minmax(0,1fr)_120px_36px]">
                 <select aria-label={`Line ${index + 1} type`} className={selectClass} {...form.register(`items.${index}.kind`)}>
                   {chargeItemKinds.map((k) => (
                     <option key={k} value={k}>
@@ -95,7 +114,7 @@ export function NewChargeDialog({ boarders }: { boarders: BoarderOption[] }) {
                     </option>
                   ))}
                 </select>
-                <div>
+                <div className="col-span-3 col-start-1 row-start-2 sm:col-span-1 sm:col-start-auto sm:row-start-auto">
                   <Input
                     aria-label={`Line ${index + 1} description`}
                     aria-invalid={errors.items?.[index]?.description ? true : undefined}
@@ -104,7 +123,7 @@ export function NewChargeDialog({ boarders }: { boarders: BoarderOption[] }) {
                   />
                   {errors.items?.[index]?.description && <p className="mt-1 text-xs text-negative">{errors.items[index]?.description?.message}</p>}
                 </div>
-                <div>
+                <div className="col-start-2 row-start-1 sm:col-start-auto sm:row-start-auto">
                   <Input
                     aria-label={`Line ${index + 1} amount in pesos`}
                     aria-invalid={errors.items?.[index]?.amount ? true : undefined}
@@ -120,6 +139,7 @@ export function NewChargeDialog({ boarders }: { boarders: BoarderOption[] }) {
                   variant="ghost"
                   size="icon"
                   aria-label={`Remove line ${index + 1}`}
+                  className="col-start-3 row-start-1 sm:col-start-auto sm:row-start-auto"
                   disabled={items.fields.length === 1}
                   onClick={() => items.remove(index)}
                 >

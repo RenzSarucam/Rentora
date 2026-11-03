@@ -19,6 +19,8 @@ test.describe("signed-out visitors", () => {
     await expect(page).toHaveURL(/\/login/);
     await page.goto("/receipts/00000000-0000-0000-0000-000000000000");
     await expect(page).toHaveURL(/\/login/);
+    await page.goto("/boarder/announcements/00000000-0000-0000-0000-000000000000");
+    await expect(page).toHaveURL(/\/login/);
   });
 
   test("CSV exports refuse anonymous requests", async ({ request }) => {

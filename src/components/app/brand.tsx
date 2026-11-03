@@ -2,10 +2,11 @@ import { cn } from "@/lib/utils";
 import { BRAND_INK, BRAND_MARK_PATH, BRAND_VIEW_BOX } from "@/lib/brand-artwork";
 
 /** Rentora's mark: a boarding house with an R-shaped doorway and window. */
-export function BrandMark({ className }: { className?: string }) {
+export function BrandMark({ className, children }: { className?: string; children?: React.ReactNode }) {
   return (
-    <svg viewBox={BRAND_VIEW_BOX} className={cn("size-6 shrink-0", className)} aria-hidden>
+    <svg viewBox={BRAND_VIEW_BOX} className={cn("rentora-brand-mark size-6 shrink-0", className)} aria-hidden>
       <path d={BRAND_MARK_PATH} fill={BRAND_INK} fillRule="evenodd" clipRule="evenodd" />
+      {children}
     </svg>
   );
 }

@@ -1,0 +1,64 @@
+@keyframes rentora-brand-enter {
+  from { transform: translateY(4px) scale(0.92); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes rentora-breathe {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.88; }
+  50% { transform: translateY(-4px) scale(1.035); opacity: 1; }
+}
+
+@keyframes rentora-trace {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -100; }
+}
+
+@keyframes rentora-loading-reveal {
+  from { visibility: hidden; opacity: 0; }
+  to { visibility: visible; opacity: 1; }
+}
+
+/* Brief requests finish before the full-app fallback becomes visible. */
+.rentora-loading {
+  animation: rentora-loading-reveal 180ms ease-out 800ms both;
+}
+
+.rentora-brand-mark {
+  transform-origin: 50% 55%;
+  animation: rentora-brand-enter 600ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rentora-loading-mark {
+  animation: rentora-breathe 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.rentora-loading-trace {
+  animation: rentora-trace 1.8s linear infinite;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  a:hover .rentora-brand-mark:not(.rentora-loading-mark),
+  button:hover .rentora-brand-mark:not(.rentora-loading-mark) {
+    transform: translateY(-1px) scale(1.04);
+  }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  a:focus-visible .rentora-brand-mark:not(.rentora-loading-mark),
+  button:focus-visible .rentora-brand-mark:not(.rentora-loading-mark) {
+    transform: translateY(-1px) scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rentora-loading { animation-duration: 0s; }
+  .rentora-brand-mark,
+  .rentora-loading-mark,
+  .rentora-loading-trace { animation: none; transition: none; }
+}
+
+@media print {
+  .rentora-brand-mark { animation: none; transform: none; }
+  .rentora-loading { display: none; }
+}

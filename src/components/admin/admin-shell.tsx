@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, Menu, UserRound } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -11,6 +12,7 @@ import { AdminNav } from "./admin-nav";
 
 export function AdminShell({
   orgName,
+  orgLocation,
   userName,
   userEmail,
   pendingPayments,
@@ -19,6 +21,7 @@ export function AdminShell({
   children,
 }: {
   orgName: string;
+  orgLocation: string | null;
   userName: string;
   userEmail: string;
   pendingPayments: number;
@@ -96,7 +99,10 @@ export function AdminShell({
           <Wordmark />
         </span>
         <p className="hidden min-w-0 truncate text-sm text-muted-foreground lg:block">
-          <span className="font-medium text-foreground">{orgName}</span> · Asia/Manila · PHP
+          <span className="font-medium text-foreground">{orgName}</span> · {" "}
+          <Link href="/admin/settings" title={orgLocation ?? "Set the boarding house address in Settings → Properties"} className="underline-offset-4 hover:text-foreground hover:underline">
+            {orgLocation ?? "Set location"}
+          </Link> · PHP
         </p>
         <div className="ml-auto hidden shrink-0 items-center gap-3 lg:flex">
           <div className="max-w-56 text-right">

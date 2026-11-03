@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/app/page-header";
 import { StatusPill } from "@/components/app/status-pill";
 import { archiveProperty } from "@/features/settings/actions";
 import { getSettings } from "@/features/settings/queries";
+import { propertyLocation } from "@/features/settings/location";
 import { OrganizationForm, PasswordResetButton, PropertyDialog } from "@/features/settings/settings-forms";
 import { requireStaff } from "@/lib/auth/session";
 
@@ -27,10 +28,11 @@ export default async function SettingsPage() {
   const viewer = await requireStaff();
   const { org, properties, team } = await getSettings(viewer.orgId);
   const activeProperties = properties.filter((p) => !p.archivedAt);
+  const location = propertyLocation(activeProperties.map((property) => property.address));
 
   return (
     <>
-      <PageHeader title="Settings" description={`${org.name} · ${org.timezone} · ${org.currency}`} />
+      <PageHeader title="Settings" description={[org.name, location, org.currency].filter(Boolean).join(" · ")} />
 
       <Section title="Business" description="How your boarding house appears to boarders, and when rent is due by default.">
         <OrganizationForm org={org} />

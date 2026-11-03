@@ -32,8 +32,7 @@ export async function saveProperty(input: unknown): Promise<ActionResult<null>> 
     ? await supabase.from("properties").update({ name, address }).eq("id", id)
     : await supabase.from("properties").insert({ organization_id: viewer.orgId, name, address });
   if (error) return dbFail(error);
-  revalidatePath("/admin/settings");
-  revalidatePath("/admin/rooms");
+  revalidatePath("/admin", "layout");
   return ok(null, id ? "Property saved." : `${name} added. You can now add rooms to it.`);
 }
 
@@ -52,7 +51,6 @@ export async function archiveProperty(input: unknown): Promise<ActionResult<null
   if ((remaining ?? 0) <= 1) return fail("Keep at least one property.");
   const { error } = await supabase.from("properties").update({ archived_at: new Date().toISOString() }).eq("id", parsed.data.id);
   if (error) return dbFail(error);
-  revalidatePath("/admin/settings");
-  revalidatePath("/admin/rooms");
+  revalidatePath("/admin", "layout");
   return ok(null, "Property archived.");
 }

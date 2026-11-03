@@ -8,8 +8,7 @@ import { announcementFlagSchema, announcementSchema } from "./schemas";
 
 function refresh() {
   revalidatePath("/admin/announcements");
-  revalidatePath("/boarder/home");
-  revalidatePath("/boarder/announcements");
+  revalidatePath("/boarder", "layout");
 }
 
 export async function saveAnnouncement(input: unknown): Promise<ActionResult<null>> {

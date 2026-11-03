@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { Viewer } from "@/lib/auth/session";
+import { getAnnouncementInbox, type BoarderAnnouncement } from "@/features/announcements/boarder-inbox";
 
 // Every query filters by the viewer's own member id. RLS enforces the same rule underneath.
 
@@ -184,20 +185,11 @@ export async function getRequest(viewer: Viewer, id: string): Promise<{ request:
   return { request, updates: updates ?? [], photoUrl: signed.data?.signedUrl ?? null };
 }
 
-export type AnnouncementRow = { id: string; title: string; body: string; pinned: boolean; published_at: string };
+export type AnnouncementRow = BoarderAnnouncement;
 
 export async function listAnnouncements(limit = 50): Promise<AnnouncementRow[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("announcements")
-    .select("id, title, body, pinned, published_at")
-    .not("published_at", "is", null)
-    .is("archived_at", null)
-    .order("pinned", { ascending: false })
-    .order("published_at", { ascending: false })
-    .limit(limit)
-    .returns<AnnouncementRow[]>();
-  return data ?? [];
+  const { announcements } = await getAnnouncementInbox();
+  return announcements.slice(0, limit);
 }
 
 export type ProfileRow = {
