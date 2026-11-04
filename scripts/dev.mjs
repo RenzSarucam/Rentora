@@ -51,6 +51,11 @@ async function syncDevAuth() {
     return;
   }
   const current = await request("/config/auth");
+  const currentHost = new URL(current.site_url ?? siteURL).hostname;
+  if (currentHost !== "localhost" && (!isIPv4(currentHost) || !isPrivate(currentHost))) {
+    console.warn("Automatic Auth URL setup skipped: this project has a hosted Site URL.");
+    return;
+  }
   const redirects = new Set((current.uri_allow_list ?? "").split(",").map((url) => url.trim()).filter(Boolean));
   if (current.site_url === siteURL && redirects.has(callbackURL)) return;
   redirects.add(callbackURL);

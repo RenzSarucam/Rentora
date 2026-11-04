@@ -1,0 +1,20 @@
+# Configure runtime credentials in Vercel, never in the source upload.
+.env*
+.backups/
+supabase/.temp/
+supabase/.branches/
+
+# Local dependencies, builds, tooling and test artifacts.
+.git/
+.next/
+.vercel/
+node_modules/
+coverage/
+test-results/
+playwright-report/
+.claude/
+.codex/
+.agents/
+.taste-skill/
+*.tsbuildinfo
+*.log

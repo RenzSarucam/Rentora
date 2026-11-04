@@ -1,6 +1,6 @@
 # Deployment (Vercel + Supabase Cloud)
 
-> Nothing in this repo deploys automatically. Each step below that creates paid resources or touches production needs the owner's go-ahead.
+> The Vercel project is connected to GitHub: pushes can trigger deployments. Keep Preview and Production variables separate. Each step below that creates paid resources or touches production needs the owner's go-ahead.
 
 ## Environments
 
@@ -11,6 +11,12 @@
 | Data | Seed/demo data allowed | Real data only; never run `seed:demo` |
 
 Keep keys separate per environment. Never point a preview deployment at the production database.
+
+### Current pilot (2026-11-04)
+
+The owner approved reusing the clean `rentora-dev` project for the online pilot because the account has reached its free-project limit. Treat this database as live: keep the existing owner account, do not seed demo data, and use a separate disposable project for future tests that write records. Production origin: `https://rentora-ph.vercel.app` (the previous `https://rentora-neon.vercel.app` domain also remains attached).
+
+Preview deployments that used this database during initial verification are removed once production is verified, and their Preview variables are cleared. Configure a separate database before enabling previews again. The local dev launcher preserves hosted Auth Site URLs rather than replacing the pilot URL with a LAN address.
 
 ## 1. Supabase project setup (each environment)
 
@@ -33,7 +39,7 @@ Keep keys separate per environment. Never point a preview deployment at the prod
 
 ## 2. Vercel setup
 
-1. Import the Git repository; framework preset Next.js; Node 24.
+1. Import the Git repository; framework preset Next.js; Node 24 (pinned in `package.json`).
 2. Environment variables (Production and Preview separately):
    | Name | Value | Exposure |
    | --- | --- | --- |
@@ -41,7 +47,7 @@ Keep keys separate per environment. Never point a preview deployment at the prod
    | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | publishable key | public |
    | `NEXT_PUBLIC_SITE_URL` | `https://<your-domain>` | public |
    | `SUPABASE_SECRET_KEY` | secret key | **server only, mark Sensitive** |
-3. Region: `sin1` (Singapore) to sit next to the database.
+3. Region: `sin1` (Singapore), configured in `vercel.json`, to sit next to the database. CLI uploads exclude local environment files, backups and test artifacts through `.vercelignore`; configure the four application variables above in Vercel before building. Do not upload `SUPABASE_ACCESS_TOKEN` or `SUPABASE_DB_PASSWORD` as application variables.
 4. Add the custom domain; HTTPS is automatic (HSTS header is already sent).
 5. Deploy a **preview** first and run the checks below against it.
 

@@ -1,8 +1,8 @@
 # Progress
 
-Status as of 2026-11-03.
+Status as of 2026-11-04.
 
-**Current data state:** `rentora-dev` was cleared at the owner's request after confirmation that every existing account/record, including the Gmail boarder, was testing. The only current login is `admin@rentora.com` (Rentora Admin, active owner). Demo login details and seeded walkthroughs below are historical. Use a separate disposable project for future seeded browser tests.
+**Current data state:** `rentora-dev` was cleared at the owner's request after confirmation that every existing account/record, including the Gmail boarder, was testing. It is now the owner-approved live pilot database at `https://rentora-ph.vercel.app`; treat its records as live. The only current login is `admin@rentora.com` (Rentora Admin, active owner). Demo login details and seeded walkthroughs below are historical. Use a separate disposable project for future seeded browser tests.
 
 | Phase | Scope | Status |
 | --- | --- | --- |
@@ -15,7 +15,7 @@ Status as of 2026-11-03.
 | 7 | Admin maintenance, announcements, reports (occupancy, collections, outstanding, overdue aging, payments) + CSV exports (formula-injection safe), settings, audit log view | Done |
 | 8 | Loading skeletons, empty states, keyboard focus, touch targets, responsive shells | Signed-in desktop + phone viewport walkthrough passed; selected screens visually reviewed (see below) |
 | 9 | Verification | Done (results below) |
-| 10 | Deployment guide, production + security checklists, backup/recovery | Done (`docs/deployment.md`) — not deployed |
+| 10 | Deployment guide, production + security checklists, backup/recovery | Pilot deployed on 2026-11-04 (`docs/deployment.md`); remaining readiness items below |
 
 ## Verification results (2026-10-31)
 
@@ -197,6 +197,24 @@ The hosted test run used a separately started production server with `E2E_BASE_U
 - Updated README with the existing logo (including its light background for dark-mode readability), product explanation, owner/boarder features, local setup, verification, project structure and deployment links. No current login password is documented. `.backups/` is gitignored.
 - Validation: `npm run verify` passed (187 unit/database tests, typecheck, lint, security scan and production build). Actual browser sign-in with the new admin passed; all nine other admin screens loaded with empty data, desktop/mobile account details showed the new identity, and no browser errors/phone overflow were observed. Screenshots are in gitignored `test-results/clean-admin-review/`. Deployment has not been started.
 
+## Deployment preparation (2026-11-04)
+
+- The owner requested deployment. Recommended a separate `rentora-prod` in Singapore, keeping `rentora-dev` for development. The database choice has not yet been confirmed; no new project, paid resource or production deployment has been created.
+- Added `vercel.json` for Next.js and Singapore (`sin1`), plus `.vercelignore` excluding local environment files, encrypted backups, Supabase CLI state and local build/test/tooling artifacts. Verified configuration keys against Vercel's live schema and documented application-only environment variables.
+- Fresh `npm run verify` passed: typecheck, lint, all 187 unit/database tests, security scan and production build. Production dependency audit reported zero vulnerabilities; the post-build security scan also passed.
+- All 68 non-seeded desktop/mobile browser checks reported success; 10 seeded checks were skipped intentionally. The Playwright command stalled during Windows managed-server shutdown after all checks finished and was interrupted, so the overall browser command did not exit successfully. No demo seeding or authenticated live test was run against the clean workspace.
+- Initially blocked on account access; the owner subsequently authenticated the Vercel CLI. The current Supabase token lists `rentora-dev` but returns no organizations. The owner confirmed through the dashboard that the account has reached its two-active-free-project limit, then explicitly approved reusing `rentora-dev` for the pilot. No paid plan was selected.
+
+## Online pilot deployment (2026-11-04)
+
+- Live URL: **https://rentora-ph.vercel.app** (previous domain `https://rentora-neon.vercel.app` also works). Vercel project `rentora` is connected to the existing GitHub repository. Production deployment `dpl_GsD6KMGZtaZyqvNCwVz318Tf8gL4` is READY, running Node 24 with function region Singapore (`sin1`). The reused Supabase database remains in Ireland; no database migration, region move, reseed or account replacement was performed.
+- Domain follow-up: `rentora.vercel.app` was already taken. At the owner's request, assigned `rentora-ph.vercel.app` and added it as a verified project domain so it stays public and follows future production deployments. Updated the Production app URL and Supabase Auth Site URL/exact callback, preserving the previous callback. Rebuilt and deployed, then verified public login, protected admin/boarder/receipt routes, manifest/service worker, security headers, environment-file denial and cross-site sign-out rejection on the new domain.
+- Configured only the four required application variables in Vercel Production; `SUPABASE_SECRET_KEY` is Sensitive. Supabase CLI access/database credentials remain local. Set the hosted Auth Site URL and exact callback to the live origin while preserving existing redirects, disabling sign-ups and retaining email confirmation.
+- Vercel automatically classified its first upload as production. That temporary deployment was removed; subsequent verification used explicit Preview deployments before the configured pilot production deployment. Both temporary previews and all four Preview application variables were removed after production verification so future previews cannot use the live pilot database. Configure a separate database before enabling previews again.
+- Pinned Node `24.x` in the package and lockfile. The local dev launcher now skips Auth URL synchronization when the hosted project has a public Site URL, preventing a local restart from replacing the live pilot URL with a LAN address. Isolated checks verified both hosted-URL preservation and normal LAN synchronization.
+- Final `npm run verify` passed (187 tests, typecheck, lint, security scan and build). Live unauthenticated checks passed for the login, admin/boarder/receipt guards, manifest, service worker, inaccessible environment file, nonce CSP/security headers and cross-site sign-out rejection. Desktop 1440 px and Pixel 7 browser checks passed for rendered login, client validation, protected redirects, no horizontal overflow and zero page errors. Screenshots and the local smoke script/result are in gitignored `test-results/deployment-review/`.
+- Authenticated production sign-in with the owner's password remains a manual handoff check; the password was not available to the deployment agent. The existing `admin@rentora.com` account is preserved. Fresh real-inbox invitations/recovery, SMTP, live uploads/payment review and physical-device PWA checks remain outstanding as listed below.
+
 ## Next steps (pick up here)
 
 1. Test a fresh invitation, first-password setup and recovery using a dedicated development test account. The earlier failed Gmail invite/account was removed in the confirmed cleanup; previous email links should not be reused.
@@ -204,7 +222,7 @@ The hosted test run used a separately started production server with `E2E_BASE_U
 3. Exercise live uploads and payment-proof review on the dev project: submit as a boarder, open as staff, verify private access and signed URL expiry, then approve/reject and inspect the resulting bill/receipt. Also test a maintenance photo.
 4. Test PWA installation/offline behaviour on a physical phone and complete the visual review of the remaining screens and dialogs.
 5. For future seeded live verification, use a **separate disposable dev project**; the current `rentora-dev` workspace is intentionally empty and its demo accounts no longer exist. Build first, then run the live suite against that test environment. In PowerShell: `npm.cmd run build`, then `$env:E2E_SUPABASE='1'; npm.cmd run test:e2e -- --workers=2`. If managing the production server separately, start `node node_modules/next/dist/bin/next start -p 3100` and set `$env:E2E_BASE_URL='http://localhost:3100'` for the test command.
-6. Later: production Supabase project in Singapore, Vercel deploy (needs owner approval), provision the first landlord.
+6. Owner: sign in at `https://rentora-ph.vercel.app` using the existing admin account and password. Before future seeded testing or preview deployments, configure a separate disposable database. A separate production database in Singapore and any paid plans remain later owner decisions.
 7. Optional: revoke `SUPABASE_ACCESS_TOKEN` in the Supabase dashboard once CLI work is done.
 
 Current admin: `admin@rentora.com`; use the password supplied by the owner. The demo seeder remains available only for a separate disposable test project; do not run it on this clean workspace or production.
