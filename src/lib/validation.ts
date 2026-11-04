@@ -57,7 +57,7 @@ export const password = z
 
 export const paymentMethods = ["cash", "gcash", "maya", "bank_transfer", "other"] as const;
 export const paymentMethod = z.enum(paymentMethods);
-export const onlineMethods = ["gcash", "maya", "bank_transfer", "other"] as const;
+export const onlineMethods = ["gcash", "bank_transfer"] as const;
 
 export const PAYMENT_METHOD_LABELS: Record<(typeof paymentMethods)[number], string> = {
   cash: "Cash",

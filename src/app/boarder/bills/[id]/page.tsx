@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { invoiceStatus, StatusPill } from "@/components/app/status-pill";
 import { PaymentProofForm } from "@/features/boarder/payment-proof-form";
+import { getPaymentReceivingAccounts } from "@/features/settings/payment-queries";
 import { balanceOf, getInvoice, invoiceTitle, isPayable, listSubmissions } from "@/features/boarder/queries";
 import { Card, CardHeading } from "@/features/boarder/ui";
 import { requireBoarder } from "@/lib/auth/session";
@@ -28,6 +29,7 @@ export default async function BillPage({ params }: PageProps<"/boarder/bills/[id
   // The database also caps a submission at (all unpaid) − (all pending); this bill's remainder is the practical limit.
   const payable = Math.max(0, balance - pendingThis);
   const canPay = isPayable(invoice) && viewer.status !== "archived" && payable > 0;
+  const receivingAccounts = canPay ? await getPaymentReceivingAccounts(viewer.orgId) : [];
   const items = [...invoice.invoice_items].sort((a, b) => a.created_at.localeCompare(b.created_at));
   const applied = invoice.payment_allocations.filter((a) => a.payments && !a.payments.voided_at);
 
@@ -109,8 +111,8 @@ export default async function BillPage({ params }: PageProps<"/boarder/bills/[id
 
       {canPay && (
         <Card id="pay" className="scroll-mt-20">
-          <CardHeading>Submit a payment</CardHeading>
-          <PaymentProofForm invoiceId={invoice.id} payable={payable} today={today} />
+          <CardHeading>Pay and submit proof</CardHeading>
+          <PaymentProofForm invoiceId={invoice.id} payable={payable} today={today} receivingAccounts={receivingAccounts} />
         </Card>
       )}
     </div>

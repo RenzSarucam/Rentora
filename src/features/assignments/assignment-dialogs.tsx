@@ -1,5 +1,6 @@
 "use client";
 
+import { roomLabel } from "@/lib/room-label";
 import { useState } from "react";
 import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,7 +42,7 @@ function BedSelect({
     >
       <option value="">Choose a vacant bed</option>
       {rooms.map((code) => (
-        <optgroup key={code} label={`Room ${code}`}>
+        <optgroup key={code} label={roomLabel(code)}>
           {beds
             .filter((b) => b.roomCode === code)
             .map((b) => (

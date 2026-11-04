@@ -1,3 +1,4 @@
+import { roomLabel } from "@/lib/room-label";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/app/empty-state";
@@ -84,10 +85,10 @@ export default async function AssignmentsPage({ searchParams }: PageProps<"/admi
                     <td className="px-3">
                       {a.roomId ? (
                         <Link href={`/admin/rooms/${a.roomId}`} className="hover:underline">
-                          Room {a.roomCode}
+                          {roomLabel(a.roomCode)}
                         </Link>
                       ) : (
-                        `Room ${a.roomCode}`
+                        roomLabel(a.roomCode)
                       )}{" "}
                       · {a.bedLabel}
                     </td>
@@ -138,7 +139,7 @@ export default async function AssignmentsPage({ searchParams }: PageProps<"/admi
                       </Link>
                     </td>
                     <td className="px-3">
-                      Room {a.roomCode} · {a.bedLabel}
+                      {roomLabel(a.roomCode)} · {a.bedLabel}
                     </td>
                     <td className="num px-3">
                       {formatDate(a.moveIn)} – {formatDate(a.moveOut)}

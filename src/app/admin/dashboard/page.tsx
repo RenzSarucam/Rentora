@@ -1,3 +1,4 @@
+import { roomLabel } from "@/lib/room-label";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -195,7 +196,7 @@ export default async function DashboardPage() {
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium">{r.title}</p>
                           <p className="text-xs text-muted-foreground">
-                            {r.room ? `Room ${r.room} · ` : ""}
+                            {r.room ? `${roomLabel(r.room)} · ` : ""}
                             {age(r.createdAt, d.today)} old
                           </p>
                         </div>
@@ -212,7 +213,7 @@ export default async function DashboardPage() {
         <section aria-labelledby="house-heading" className="flex min-h-0 flex-col rounded-lg border border-border p-4">
           <div className="mb-3 flex shrink-0 flex-wrap items-center justify-between gap-3">
             <h2 id="house-heading" className="text-base font-semibold">
-              The house <span className="num text-sm font-normal text-muted-foreground">· {occ.rooms} rooms, {occ.beds} beds</span>
+              The house <span className="num text-sm font-normal text-muted-foreground">· {occ.rooms} room{occ.rooms === 1 ? "" : "s"}, {occ.beds} bed{occ.beds === 1 ? "" : "s"}</span>
             </h2>
             <BedLegend />
           </div>
@@ -224,7 +225,7 @@ export default async function DashboardPage() {
                 {rooms.map((room) => (
                   <li key={room.id} className="flex items-center gap-3">
                     <Link href={`/admin/rooms/${room.id}`} className="w-20 shrink-0 text-sm font-medium hover:underline">
-                      Room {room.code}
+                      {roomLabel(room.code)}
                     </Link>
                     <BedCells beds={room.beds} roomUnderMaintenance={room.status === "maintenance"} size="sm" />
                   </li>

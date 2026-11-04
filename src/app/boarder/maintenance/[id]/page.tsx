@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { roomLabel } from "@/lib/room-label";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
@@ -35,7 +36,7 @@ export default async function MaintenanceDetailPage({ params }: PageProps<"/boar
           <StatusPill tone={s.tone}>{s.label}</StatusPill>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          {request.rooms ? `Room ${request.rooms.code} · ` : ""}
+          {request.rooms ? `${roomLabel(request.rooms.code)} · ` : ""}
           {formatDateTime(request.created_at)}
           {request.priority === "urgent" && <span className="text-negative"> · Urgent</span>}
         </p>

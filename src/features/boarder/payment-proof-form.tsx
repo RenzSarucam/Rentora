@@ -6,14 +6,18 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Field, FormError, SubmitButton } from "@/components/app/form";
 import type { FieldErrors } from "@/lib/errors";
-import { centavosToInput, formatPeso } from "@/lib/money";
+import { centavosToInput, formatPeso, parsePesoToCentavos } from "@/lib/money";
 import { onlineMethods, PAYMENT_METHOD_LABELS } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 import { submitPaymentProof } from "./actions";
 import { FilePicker } from "./file-picker";
 import { paymentProofSchema } from "./schemas";
+import { PaymentQRCard } from "./payment-qr-card";
+import type { PaymentReceivingAccount } from "@/features/settings/payment-receiving";
 
-export function PaymentProofForm({ invoiceId, payable, today }: { invoiceId: string; payable: number; today: string }) {
+export function PaymentProofForm({ invoiceId, payable, today, receivingAccounts }: {
+  invoiceId: string; payable: number; today: string; receivingAccounts: PaymentReceivingAccount[];
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [amount, setAmount] = useState(centavosToInput(payable));
@@ -23,6 +27,11 @@ export function PaymentProofForm({ invoiceId, payable, today }: { invoiceId: str
   const [proof, setProof] = useState<File | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [error, setError] = useState<string | null>(null);
+  const enteredAmount = parsePesoToCentavos(amount);
+  const validAmount = enteredAmount !== null && enteredAmount > 0 && enteredAmount <= payable;
+  const amountError = amount.trim() && !validAmount
+    ? `Enter an amount greater than ₱0 and up to ${formatPeso(payable)}.` : undefined;
+  const receivingAccount = receivingAccounts.find((account) => account.method === method);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -55,12 +64,12 @@ export function PaymentProofForm({ invoiceId, payable, today }: { invoiceId: str
   return (
     <form onSubmit={submit} noValidate className="grid gap-4">
       <p className="rounded-xl bg-raised px-3.5 py-3 text-sm text-muted-foreground">
-        Pay through GCash, Maya or your bank first, then send the screenshot here. Your landlord checks it before the bill is marked paid.
+        Choose GCash or bank transfer, pay using the receiving QR, then send your proof here. Your landlord approves the payment before it is credited to your bill.
       </p>
       <FormError message={error} />
 
       <fieldset className="grid gap-1.5">
-        <legend className="mb-1.5 text-sm font-medium">How did you pay?</legend>
+        <legend className="mb-1.5 text-sm font-medium">Payment method</legend>
         <div className="grid grid-cols-2 gap-2">
           {onlineMethods.map((m) => (
             <label
@@ -78,9 +87,15 @@ export function PaymentProofForm({ invoiceId, payable, today }: { invoiceId: str
         {errors.method && <p className="text-xs font-medium text-negative">{errors.method}</p>}
       </fieldset>
 
-      <Field label="Amount paid (₱)" hint={`Up to ${formatPeso(payable)} on this bill`} error={errors.amount}>
+      <Field label="Amount to pay (₱)" hint={`Up to ${formatPeso(payable)} on this bill. You can make a partial payment.`} error={errors.amount ?? amountError}>
         {(p) => <Input {...p} inputMode="decimal" className="h-12 rounded-xl text-base num" value={amount} onChange={(e) => setAmount(e.target.value)} />}
       </Field>
+      <PaymentQRCard key={`${method}-${receivingAccount?.qrUrl ?? "missing"}`} method={method} account={receivingAccount}
+        amount={validAmount ? enteredAmount : null} disabled={pending} />
+      <div className="border-t border-border pt-4">
+        <h3 className="text-base font-semibold">After paying, send your proof</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Use the actual amount and reference on your receipt.</p>
+      </div>
       <Field label="Reference number" hint="The transaction or reference no. on your receipt" error={errors.reference}>
         {(p) => (
           <Input

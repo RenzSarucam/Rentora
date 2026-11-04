@@ -1,3 +1,4 @@
+import { roomLabel } from "@/lib/room-label";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -30,7 +31,7 @@ export default async function RoomPage({ params }: PageProps<"/admin/rooms/[id]"
         back={{ href: "/admin/rooms", label: "Rooms & beds" }}
         title={
           <span className="flex items-center gap-3">
-            Room {room.code}
+            {roomLabel(room.code)}
             {room.status === "maintenance" && <StatusPill tone="warning">Under maintenance</StatusPill>}
           </span>
         }

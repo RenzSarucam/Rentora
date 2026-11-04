@@ -1,3 +1,4 @@
+import { roomLabel } from "@/lib/room-label";
 import type { Metadata } from "next";
 import { listAssignments } from "@/features/boarder/queries";
 import { Card, CardHeading, Empty, List, ScreenTitle } from "@/features/boarder/ui";
@@ -29,7 +30,7 @@ export default async function MyRoomPage() {
       {current && room ? (
         <Card>
           <p className="text-sm text-muted-foreground">{room.properties?.name}</p>
-          <p className="mt-0.5 text-[28px] leading-tight font-semibold tracking-[-0.01em]">Room {room.code}</p>
+          <p className="mt-0.5 text-[28px] leading-tight font-semibold tracking-[-0.01em]">{roomLabel(room.code)}</p>
           <p className="text-[15px]">{current.beds?.label}</p>
           <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 text-[15px]">
             <dt className="text-muted-foreground">Monthly rent</dt>
@@ -69,7 +70,7 @@ export default async function MyRoomPage() {
             {past.map((a) => (
               <li key={a.id} className="flex items-center justify-between gap-3 py-3 text-[15px]">
                 <span>
-                  Room {a.beds?.rooms?.code} · {a.beds?.label}
+                  {roomLabel(a.beds?.rooms?.code ?? "?")} · {a.beds?.label}
                   <span className="block text-sm text-muted-foreground">
                     {formatDate(a.move_in_date)} – {formatDate(a.move_out_date)}
                   </span>

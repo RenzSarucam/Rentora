@@ -1,3 +1,4 @@
+import { roomLabel } from "@/lib/room-label";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
@@ -56,7 +57,7 @@ export default async function RoomsPage() {
                     <tr key={room.id} className="group border-b border-rule hover:bg-raised/60">
                       <td className="py-3 pr-3">
                         <Link href={`/admin/rooms/${room.id}`} className="font-medium text-foreground hover:underline">
-                          Room {room.code}
+                          {roomLabel(room.code)}
                         </Link>
                         {room.floor && <p className="text-xs text-muted-foreground">{room.floor} floor</p>}
                       </td>

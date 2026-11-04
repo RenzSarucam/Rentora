@@ -1,3 +1,4 @@
+import { roomLabel } from "@/lib/room-label";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/app/empty-state";
@@ -76,7 +77,7 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/admi
                       </Link>
                     </td>
                     <td className="px-3">{r.boarder}</td>
-                    <td className="px-3 text-muted-foreground">{r.room ? `Room ${r.room}` : "—"}</td>
+                    <td className="px-3 text-muted-foreground">{r.room ? roomLabel(r.room) : "—"}</td>
                     <td className="px-3">
                       {r.priority === "urgent" ? (
                         <StatusPill tone="negative">Urgent</StatusPill>

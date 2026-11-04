@@ -1,3 +1,4 @@
+import { roomLabel } from "@/lib/room-label";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -31,7 +32,7 @@ export default async function MaintenanceRequestPage({ params }: PageProps<"/adm
             {req.priority === "urgent" && <StatusPill tone="negative">Urgent</StatusPill>}
           </span>
         }
-        description={`${req.room ? `Room ${req.room}` : "No room on file"} · filed by ${req.boarder} ${ageLabel(req.createdAt).toLowerCase() === "today" ? "today" : `${ageLabel(req.createdAt)} ago`}`}
+        description={`${req.room ? roomLabel(req.room) : "No room on file"} · filed by ${req.boarder} ${ageLabel(req.createdAt).toLowerCase() === "today" ? "today" : `${ageLabel(req.createdAt)} ago`}`}
       />
 
       <div className="grid gap-8 lg:grid-cols-[1fr_340px]">

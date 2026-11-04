@@ -55,7 +55,7 @@ export default async function PaymentsPage() {
         <TabsContent value="review">
           {pending.length === 0 ? (
             <EmptyState title="You're all caught up">
-              When a boarder sends a GCash, Maya or bank transfer proof, it shows up here for you to confirm.
+              When a boarder sends a GCash or bank transfer proof, it shows up here for you to confirm.
             </EmptyState>
           ) : (
             <div className="overflow-x-auto">

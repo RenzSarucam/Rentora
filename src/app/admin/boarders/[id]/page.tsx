@@ -1,3 +1,4 @@
+import { roomLabel } from "@/lib/room-label";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -51,7 +52,7 @@ export default async function BoarderPage({ params }: PageProps<"/admin/boarders
         }
         description={
           boarder.current
-            ? `Room ${boarder.current.roomCode} · ${boarder.current.bedLabel} since ${formatDate(boarder.current.moveIn)}`
+            ? `${roomLabel(boarder.current.roomCode)} · ${boarder.current.bedLabel} since ${formatDate(boarder.current.moveIn)}`
             : archived
               ? "Moved out. History is kept for your records."
               : "No bed assigned yet."
@@ -179,10 +180,10 @@ export default async function BoarderPage({ params }: PageProps<"/admin/boarders
                     <span>
                       {a.roomId ? (
                         <Link href={`/admin/rooms/${a.roomId}`} className="font-medium hover:underline">
-                          Room {a.roomCode}
+                          {roomLabel(a.roomCode)}
                         </Link>
                       ) : (
-                        <span className="font-medium">Room {a.roomCode}</span>
+                        <span className="font-medium">{roomLabel(a.roomCode)}</span>
                       )}{" "}
                       · {a.bedLabel}
                       <span className="block text-xs text-muted-foreground">
@@ -237,7 +238,7 @@ export default async function BoarderPage({ params }: PageProps<"/admin/boarders
               <h2 className="mb-1 text-sm font-semibold">Current bed</h2>
               <p className="text-sm">
                 <Link href={`/admin/rooms/${boarder.current.roomId}`} className="hover:underline">
-                  Room {boarder.current.roomCode}
+                  {roomLabel(boarder.current.roomCode)}
                 </Link>{" "}
                 · {boarder.current.bedLabel}
               </p>

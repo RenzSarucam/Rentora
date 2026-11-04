@@ -4,6 +4,7 @@ import Link from "next/link";
 import { DataTable, type Column } from "@/components/app/data-table";
 import { StatusPill } from "@/components/app/status-pill";
 import { formatPeso } from "@/lib/money";
+import { roomLabel } from "@/lib/room-label";
 import type { BoarderListItem } from "./queries";
 
 const STATUS: Record<BoarderListItem["status"], { label: string; tone: "warning" | "positive" | "neutral" }> = {
@@ -60,7 +61,7 @@ const columns: Column<Row>[] = [
 ];
 
 export function BoardersTable({ boarders, emptyMessage }: { boarders: BoarderListItem[]; emptyMessage: React.ReactNode }) {
-  const rows: Row[] = boarders.map((b) => ({ ...b, bedText: b.bed ? `Room ${b.bed.roomCode} · ${b.bed.label}` : "" }));
+  const rows: Row[] = boarders.map((b) => ({ ...b, bedText: b.bed ? `${roomLabel(b.bed.roomCode)} · ${b.bed.label}` : "" }));
   return (
     <DataTable
       data={rows}

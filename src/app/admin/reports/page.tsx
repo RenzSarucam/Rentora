@@ -1,3 +1,4 @@
+import { roomLabel } from "@/lib/room-label";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Download } from "lucide-react";
@@ -231,7 +232,7 @@ export default async function ReportsPage({ searchParams }: PageProps<"/admin/re
                 <tbody>
                   {roomRows.map((r) => (
                     <tr key={r.id} className="border-b border-rule">
-                      <td className={td}>Room {r.code}</td>
+                      <td className={td}>{roomLabel(r.code)}</td>
                       <td className={`${td} num text-right`}>{r.beds}</td>
                       <td className={`${td} num text-right`}>{r.occupied}</td>
                       <td className={`${td} num text-right`}>{r.vacant}</td>

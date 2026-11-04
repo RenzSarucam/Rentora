@@ -19,6 +19,12 @@ describe("payment proof validation", () => {
   it("does not allow cash (cash is recorded by the landlord)", () => {
     expect(paymentProofSchema.safeParse({ ...valid, method: "cash" }).success).toBe(false);
   });
+  it.each(["maya", "other"])("does not offer %s for new boarder submissions", (method) => {
+    expect(paymentProofSchema.safeParse({ ...valid, method }).success).toBe(false);
+  });
+  it("accepts bank transfer with the same exact-centavo amount parsing", () => {
+    expect(paymentProofSchema.parse({ ...valid, method: "bank_transfer", amount: "250.25" }).amount).toBe(25025);
+  });
 
   it.each(["", "abc", "<script>", "ref;drop", "x".repeat(65)])("rejects reference %j", (reference) => {
     expect(paymentProofSchema.safeParse({ ...valid, reference }).success).toBe(false);

@@ -104,6 +104,7 @@ describe("storage policies", () => {
     expect(rows.rows).toEqual([
       { id: "maintenance-photos", public: false, file_size_limit: 5242880 },
       { id: "payment-proofs", public: false, file_size_limit: 5242880 },
+      { id: "payment-qrs", public: false, file_size_limit: 4194304 },
     ]);
   });
 

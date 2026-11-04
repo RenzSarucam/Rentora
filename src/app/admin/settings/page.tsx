@@ -6,6 +6,8 @@ import { PageHeader } from "@/components/app/page-header";
 import { StatusPill } from "@/components/app/status-pill";
 import { archiveProperty } from "@/features/settings/actions";
 import { getSettings } from "@/features/settings/queries";
+import { getPaymentReceivingAccounts } from "@/features/settings/payment-queries";
+import { PaymentReceivingForm } from "@/features/settings/payment-receiving-form";
 import { propertyLocation } from "@/features/settings/location";
 import { OrganizationForm, PasswordResetButton, PropertyDialog } from "@/features/settings/settings-forms";
 import { requireStaff } from "@/lib/auth/session";
@@ -27,6 +29,7 @@ function Section({ title, description, children }: { title: string; description:
 export default async function SettingsPage() {
   const viewer = await requireStaff();
   const { org, properties, team } = await getSettings(viewer.orgId);
+  const receivingAccounts = viewer.role === "owner" ? await getPaymentReceivingAccounts(viewer.orgId) : [];
   const activeProperties = properties.filter((p) => !p.archivedAt);
   const location = propertyLocation(activeProperties.map((property) => property.address));
 
@@ -37,6 +40,17 @@ export default async function SettingsPage() {
       <Section title="Business" description="How your boarding house appears to boarders, and when rent is due by default.">
         <OrganizationForm org={org} />
       </Section>
+
+      {viewer.role === "owner" && (
+        <Section title="Payment receiving details" description="Add your GCash and receiving-bank QR images. Boarders pay in their own app and send proof for your approval.">
+          <div className="grid gap-8 xl:grid-cols-2">
+            {(["gcash", "bank_transfer"] as const).map((method) => {
+              const account = receivingAccounts.find((row) => row.method === method);
+              return <PaymentReceivingForm key={`${method}-${account?.qrUrl ?? "new"}`} method={method} account={account} />;
+            })}
+          </div>
+        </Section>
+      )}
 
       <Section
         title="Properties"

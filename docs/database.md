@@ -9,6 +9,7 @@ Source of truth: `supabase/migrations/`. Tests: `tests/db/` (run `npm run test:d
 | `…03_rls.sql` | ownership helpers, grants, RLS policies, maintenance status RPC |
 | `…04_storage.sql` | private buckets and storage policies |
 | `20261104000001_delete_boarder_functions.sql` | owner-confirmed erasure RPCs and private resumable cleanup jobs; applied to the pilot |
+| `20261104000002_payment_qr_functions.sql` | owner-managed private receiving QR configuration; GCash/bank submission choices and per-invoice pending cap; applied to the pilot with owner approval |
 
 ## Entities
 
@@ -18,6 +19,7 @@ organizations ─┬─ organization_members (role owner|admin|boarder, status i
                ├─ properties ── rooms ── beds ── boarder_assignments (member ↔ bed, move-in/out, rent snapshot)
                ├─ invoices (rent|deposit|other) ── invoice_items (rent|fee|discount|deposit|other)
                ├─ payment_submissions (boarder proof, pending|approved|rejected)
+               ├─ payment_receiving_accounts (GCash / receiving bank; owner-managed QR)
                ├─ payments ── payment_allocations ── invoices
                ├─ maintenance_requests ── maintenance_updates
                ├─ announcements
@@ -41,6 +43,7 @@ Every tenant row has `organization_id`. Composite foreign keys (`(organization_i
 | Discounts can't exceed charges; payments can't exceed balance | checks in `recompute_invoice` and `post_payment` |
 | A payment's allocations never exceed the payment | `allocations_recompute` trigger |
 | A submission is posted at most once | row lock + status check in `approve_payment_submission`, unique `payments.submission_id` |
+| New boarder submissions use GCash/bank transfer and cannot exceed the selected bill after pending proofs | `submit_payment` locks the member/invoice and checks both member-wide and per-invoice reservations; history retains older method values |
 | A transaction reference is live once per org | partial unique index `submissions_reference_unique` (rejected ones free it) |
 | Payments, allocations and audit logs are append-only in ordinary operations | `block_mutation` / `guard_payment_update`; owner-confirmed boarder erasure grants a private transaction-bound exception for exact row IDs |
 | Historical amounts preserved | rent copied into the assignment and invoice item at creation; rate changes don't touch issued invoices |
@@ -73,10 +76,13 @@ After commit, the authorized server action removes orphan uploads using the Stor
 | rooms / beds | full (no direct room insert: RPC) | only rooms/beds they occupy(d) | none |
 | boarder_assignments | read, update rent | own | none |
 | invoices / items / allocations / payments / submissions | read (writes via RPC) | own only | none |
+| payment_receiving_accounts | read; active owner alone inserts/updates permitted fields | read current house details while non-archived | none |
 | maintenance_requests / updates | read, comment | own; create; comment while open | none |
 | announcements | full | published, in own org | none |
 | audit_logs | read | none | none |
 | storage objects | read org folder | upload/read own folder | none |
+
+The private `payment-qrs` bucket adds a separate policy: active owners upload new original JPG/PNG files only into their own organization/member folder; house members read currently referenced receiving images. Owners can also read their own newly uploaded images before saving configuration. No authenticated overwrite/delete policy is added. Replacing a QR uses a new path and server-side orphan cleanup after the previous path is no longer referenced. Images are limited to 4 MB, checked by magic bytes, preserved without resizing and served by 60-second signed URLs.
 
 ## Generating TypeScript types
 

@@ -1,5 +1,6 @@
 "use server";
 
+import { roomLabel } from "@/lib/room-label";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireStaff } from "@/lib/auth/session";
@@ -30,7 +31,7 @@ export async function createRoom(input: unknown): Promise<ActionResult<{ id: str
   });
   if (error) return dbFail(error);
   refresh();
-  return ok({ id: data as string }, `Room ${v.code} added with ${v.capacity} bed${v.capacity === 1 ? "" : "s"}.`);
+  return ok({ id: data as string }, `${roomLabel(v.code)} added with ${v.capacity} bed${v.capacity === 1 ? "" : "s"}.`);
 }
 
 export async function updateRoom(input: unknown): Promise<ActionResult<null>> {

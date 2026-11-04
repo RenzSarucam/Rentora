@@ -60,6 +60,12 @@ npm run provision:admin -- --email owner@example.ph --name "Owner Name" \
 ```
 The owner receives an invitation email, sets a password, and lands on `/admin/dashboard`.
 
+## Receiving QR setup
+
+After applying `20261104000002_payment_qr_functions.sql` and releasing the matching app, the owner opens **Settings → Payment receiving details**. Upload the original GCash QR image, enter the receiver name shown in the wallet, and save. Repeat for Bank transfer, with the receiving bank name (for this pilot, MariBank). The receiving mobile/account number is optional; enter it only if boarders should also be able to copy it for a manual transfer. JPG/PNG originals up to 4 MB are accepted without resizing.
+
+Until a channel is configured, bills show that its receiving QR has not been added; the app never fabricates a receiver. Boarders choose one of the two channels, set an amount up to the bill's remaining balance after pending proofs, save/scan the QR and authorize the payment in their wallet/bank app. They then submit the actual paid amount, reference, date and proof for staff review. Credits occur only after approval. Transfer fees and final authorization belong to the payment app. No merchant checkout, automatic wallet debit, card-number or CVC form is included in this manual QR release.
+
 ## Production readiness checklist
 
 - [ ] `npm run verify` passes on the release commit (typecheck, lint, unit + DB tests, security scan, build)

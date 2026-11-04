@@ -15,3 +15,14 @@ export const propertySchema = z.object({
   name: requiredText("Property name", 120),
   address: optionalText(300),
 });
+
+export const receivingAccountSchema = z.object({
+  method: z.enum(["gcash", "bank_transfer"]),
+  accountName: requiredText("Account name", 120, 2),
+  institutionName: optionalText(100),
+  accountNumber: z.string().trim().max(40).refine((value) => !value || /^[A-Za-z0-9+ -]{4,40}$/.test(value), {
+    message: "Enter the receiving mobile or account number, or leave it blank when using QR.",
+  }).transform((value) => value || null),
+}).refine((value) => value.method !== "bank_transfer" || !!value.institutionName, {
+  path: ["institutionName"], message: "Enter the receiving bank name.",
+});

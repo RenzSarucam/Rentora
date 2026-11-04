@@ -1,3 +1,4 @@
+import { roomLabel } from "@/lib/room-label";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
@@ -91,7 +92,7 @@ export default async function BoarderHome() {
             {current?.beds?.rooms ? (
               <>
                 <p className="mt-0.5 text-lg font-semibold">
-                  Room {current.beds.rooms.code} · {current.beds.label}
+                  {roomLabel(current.beds.rooms.code)} · {current.beds.label}
                 </p>
                 <p className="num text-sm text-muted-foreground">{formatPeso(current.monthly_rent_centavos)} a month</p>
               </>
