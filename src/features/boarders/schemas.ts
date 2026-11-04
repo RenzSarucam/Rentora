@@ -23,3 +23,11 @@ export const notesSchema = z.object({
 export const memberRefSchema = z.object({ memberId: uuid });
 
 export const archiveSchema = z.object({ memberId: uuid, archived: z.boolean() });
+
+export const deleteBoarderSchema = z.object({
+  memberId: uuid,
+  confirmationEmail: email,
+  acknowledge: z.literal(true),
+});
+
+export const finishDeletionSchema = z.object({ jobId: uuid });

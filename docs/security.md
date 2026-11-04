@@ -32,7 +32,8 @@ Actors: anonymous internet users; a boarder trying to see/alter others' data or 
 | Caching | Signed-in responses `Cache-Control: private, no-store`; service worker never caches HTML/RSC/API/Supabase | proxy, `public/sw.js` | Code review; E2E sw headers |
 | Logging | No `console.log` in app code (scan-enforced); errors logged as codes; DB errors mapped to safe text | `lib/errors.ts` | security scan; `lib.test.ts` error mapping |
 | Production diagnostics | No source maps shipped; generic error page; Next dev overlay absent in production | `next.config.ts`, `app/error.tsx` | security scan (.map check after build) |
-| Audit | Semantic audit entries from RPCs + row-change triggers (column names only, no values); append-only; staff-readable | migrations 02 | `rls.test.ts` audit tests |
+| Audit | Semantic audit entries from RPCs + row-change triggers (column names only, no values); ordinary mutations blocked; owner-confirmed boarder erasure removes associated history and records deletion | migrations 02 and boarder deletion migration | `rls.test.ts`, `boarder-deletion.test.ts` |
+| Permanent boarder deletion | Active owner only; typed current email and acknowledgement; exact row IDs authorized only inside the deletion transaction; cross-account links rejected; private RLS jobs resume scoped Storage cleanup and Auth deletion | boarder deletion migration, `features/boarders/deletion-actions.ts` | 23 database deletion tests, 6 orphan-cleanup tests; isolated dialog checks at 1440/393/320 px |
 | Dependencies | `npm run security:audit` (prod deps, high+) | package.json | Run in CI / before release |
 
 ## Verification commands

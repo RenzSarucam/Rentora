@@ -2,6 +2,16 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { MemberStatus } from "@/lib/auth/session";
 
+export type PendingBoarderDeletion = { id: string; display_name: string | null; status: string };
+
+/** Caller must be an active owner; the RPC independently scopes the private jobs. */
+export async function listPendingBoarderDeletions(): Promise<PendingBoarderDeletion[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("boarder_deletion_jobs");
+  if (error) throw new Error("Could not load pending boarder deletions");
+  return (data ?? []) as PendingBoarderDeletion[];
+}
+
 type Profile = { full_name: string; email: string; phone: string | null };
 
 type AssignmentEmbed = {

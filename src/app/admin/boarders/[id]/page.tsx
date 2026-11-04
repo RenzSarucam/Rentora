@@ -9,7 +9,9 @@ import { listVacantBeds } from "@/features/assignments/queries";
 import { resendInvite, setBoarderArchived } from "@/features/boarders/actions";
 import { NotesForm } from "@/features/boarders/notes-form";
 import { ProfileDialog } from "@/features/boarders/profile-dialog";
+import { DeleteBoarderDialog } from "@/features/boarders/delete-boarder-dialog";
 import { getBoarder } from "@/features/boarders/queries";
+import { requireStaff } from "@/lib/auth/session";
 import { formatDate, formatDateTime, formatMonth, manilaToday } from "@/lib/dates";
 import { formatPeso } from "@/lib/money";
 import { PAYMENT_METHOD_LABELS, uuid } from "@/lib/validation";
@@ -19,6 +21,7 @@ export const metadata: Metadata = { title: "Boarder" };
 const KIND_LABEL: Record<string, string> = { rent: "Rent", deposit: "Deposit", other: "Charge" };
 
 export default async function BoarderPage({ params }: PageProps<"/admin/boarders/[id]">) {
+  const viewer = await requireStaff();
   const { id } = await params;
   if (!uuid.safeParse(id).success) notFound();
   const [boarder, beds] = await Promise.all([getBoarder(id), listVacantBeds()]);
@@ -282,6 +285,12 @@ export default async function BoarderPage({ params }: PageProps<"/admin/boarders
               </>
             )}
           </div>
+          {viewer.role === "owner" && (
+            <div className="border-t border-border pt-5">
+              <DeleteBoarderDialog memberId={boarder.id} name={boarder.name} email={boarder.email}
+                invoices={boarder.invoices.length} payments={boarder.payments.length} outstanding={boarder.outstanding} hasBed={Boolean(boarder.current)} />
+            </div>
+          )}
         </aside>
       </div>
     </>

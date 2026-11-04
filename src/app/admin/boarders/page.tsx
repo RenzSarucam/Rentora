@@ -2,17 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/app/page-header";
 import { BoardersTable } from "@/features/boarders/boarders-table";
+import { ActionButton } from "@/components/app/action-button";
+import { finishBoarderDeletion } from "@/features/boarders/deletion-actions";
 import { InviteDialog } from "@/features/boarders/invite-dialog";
-import { listBoarders } from "@/features/boarders/queries";
+import { listBoarders, listPendingBoarderDeletions } from "@/features/boarders/queries";
+import { requireStaff } from "@/lib/auth/session";
 import { formatPeso } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Boarders" };
 
 export default async function BoardersPage({ searchParams }: PageProps<"/admin/boarders">) {
-  const { view } = await searchParams;
+  const viewer = await requireStaff();
+  const { view, deletion } = await searchParams;
   const archivedView = view === "archived";
-  const all = await listBoarders();
+  const [all, pendingDeletions] = await Promise.all([listBoarders(), viewer.role === "owner" ? listPendingBoarderDeletions() : Promise.resolve([])]);
   const current = all.filter((b) => b.status !== "archived");
   const archived = all.filter((b) => b.status === "archived");
   const shown = archivedView ? archived : current;
@@ -44,6 +48,22 @@ export default async function BoardersPage({ searchParams }: PageProps<"/admin/b
         }
         actions={<InviteDialog />}
       />
+
+      {deletion === "complete" && <p role="status" className="mb-5 rounded-lg border border-border p-4 text-sm">Boarder, login and linked data permanently deleted.</p>}
+      {pendingDeletions.length > 0 && (
+        <section aria-labelledby="pending-deletion-title" className="mb-5 rounded-lg border border-border p-4">
+          <h2 id="pending-deletion-title" className="text-sm font-medium">Finish boarder deletion</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Their app records are removed. Complete the remaining file and login cleanup.</p>
+          <ul className="mt-3 divide-y divide-border">
+            {pendingDeletions.map((job) => (
+              <li key={job.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <span className="min-w-0 break-words text-sm">{job.display_name || "Boarder"}</span>
+                <ActionButton action={finishBoarderDeletion} input={{ jobId: job.id }}>Finish deletion</ActionButton>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <nav aria-label="Boarder lists" className="mb-5 flex gap-6 border-b border-border">
         {tabs.map((t) => (
