@@ -2,10 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { createBrowserClient } from "@supabase/ssr";
+import { RouteLoading } from "@/components/app/route-loading";
 import { publicEnv } from "@/lib/env";
 import { readEmailSession } from "./email-link";
 
-export function EmailLinkSession() {
+export function EmailLinkSession({ fallback }: { fallback?: string }) {
   const started = useRef(false);
 
   useEffect(() => {
@@ -13,10 +14,12 @@ export function EmailLinkSession() {
     started.current = true;
     const url = new URL(window.location.href);
     const session = readEmailSession(url.hash, url.searchParams.get("next"));
+    const fragment = new URLSearchParams(url.hash.replace(/^#/, ""));
+    const hasEmailFragment = ["access_token", "refresh_token", "type", "error", "error_code"].some((key) => fragment.has(key));
     // Remove credentials from browser history before making requests or navigating.
     window.history.replaceState(window.history.state, "", url.pathname);
     if (!session) {
-      window.location.replace("/login?error=link");
+      window.location.replace(fallback && !hasEmailFragment ? fallback : "/login?error=link");
       return;
     }
 
@@ -34,7 +37,9 @@ export function EmailLinkSession() {
       }
     };
     void complete();
-  }, []);
+  }, [fallback]);
+
+  if (fallback) return <RouteLoading />;
 
   return (
     <>
